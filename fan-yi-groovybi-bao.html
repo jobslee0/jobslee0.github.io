@@ -1,0 +1,233 @@
+<!DOCTYPE html><html lang="zh-cn"><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>【翻译】Groovy闭包 - Z.H.</title><meta name="robots" content="noindex,nofollow"><meta name="generator" content="Publii Open-Source CMS for Static Site"><script type="text/javascript" async src="https://www.googletagmanager.com/gtag/js?id=6694651183"></script><script type="text/javascript">window.dataLayer = window.dataLayer || [];
+				  function gtag(){dataLayer.push(arguments);}
+				  gtag('js', new Date());
+				  gtag('config', '6694651183' );
+				  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-NRGQEGZN7K"></script><script>window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-NRGQEGZN7K');</script><link rel="alternate" type="application/atom+xml" href="https://jobslee0.github.io/feed.xml"><link rel="alternate" type="application/json" href="https://jobslee0.github.io/feed.json"><meta property="og:title" content="【翻译】Groovy闭包"><meta property="og:site_name" content="Z.H."><meta property="og:description" content="闭包 本章节主要讲解Groovy的闭包。Groovy中的闭包是一个开放、匿名、可以携带参数的代码块，同时可以返回一个指定变量的值。一个闭包可以引用在它周围声明的变量。与闭包的正式定义相反的，Closure在Groovy语言中还可以包含在其周围范围之外定义的自由变量。虽然打破了闭包的正式概念，但它提供了本章中描述的各种优点。 一个闭包的定义遵循以下语法： { [closureParameters -&gt;&hellip;"><meta property="og:url" content="https://jobslee0.github.io/fan-yi-groovybi-bao.html"><meta property="og:type" content="article"><link rel="shortcut icon" href="https://jobslee0.github.io/media/website/photo2pixel_download-2.png" type="image/x-icon"><link rel="preload" href="https://jobslee0.github.io/assets/dynamic/fonts/jetbrainsmono/jetbrainsmono.woff2" as="font" type="font/woff2" crossorigin><link rel="preload" href="https://jobslee0.github.io/assets/dynamic/fonts/jetbrainsmono/jetbrainsmono-italic.woff2" as="font" type="font/woff2" crossorigin><link rel="stylesheet" href="https://jobslee0.github.io/assets/css/style.css?v=82007ae11cb9f2a56571c770331b13e7"><script type="application/ld+json">{"@context":"http://schema.org","@type":"Article","mainEntityOfPage":{"@type":"WebPage","@id":"https://jobslee0.github.io/fan-yi-groovybi-bao.html"},"headline":"【翻译】Groovy闭包","datePublished":"2023-01-09T15:45","dateModified":"2024-09-26T23:01","description":"闭包 本章节主要讲解Groovy的闭包。Groovy中的闭包是一个开放、匿名、可以携带参数的代码块，同时可以返回一个指定变量的值。一个闭包可以引用在它周围声明的变量。与闭包的正式定义相反的，Closure在Groovy语言中还可以包含在其周围范围之外定义的自由变量。虽然打破了闭包的正式概念，但它提供了本章中描述的各种优点。 一个闭包的定义遵循以下语法： { [closureParameters -&gt;&hellip;","author":{"@type":"Person","name":"Jobs.Lee","url":"https://jobslee0.github.io/authors/jobslee/"},"publisher":{"@type":"Organization","name":"Jobs.Lee"}}</script><noscript><style>img[loading] {
+                    opacity: 1;
+                }</style></noscript></head><body class="post-template"><div class="container container--center"><header class="header"><div class="header__logo"><a class="logo" href="https://jobslee0.github.io/">Z.H.</a></div></header><main class="content"><article class="post"><header><h1 class="post__title">【翻译】Groovy闭包</h1><div class="post__meta"><time datetime="2023-01-09T15:45" class="post__date">一月 9, 2023 </time><span class="post__author"><a href="https://jobslee0.github.io/authors/jobslee/" class="feed__author">Jobs.Lee</a></span></div></header><div class="post__entry"><h1 id="闭包">闭包</h1><p>本章节主要讲解Groovy的闭包。Groovy中的闭包是一个开放、匿名、可以携带参数的代码块，同时可以返回一个指定变量的值。一个闭包可以引用在它周围声明的变量。与闭包的正式定义相反的，<code>Closure</code>在Groovy语言中还可以包含在其周围范围之外定义的自由变量。虽然打破了闭包的正式概念，但它提供了本章中描述的各种优点。</p><h2 id="1-语法">1. 语法</h2><h3 id="11-定义一个闭包">1.1. 定义一个闭包</h3><p>一个闭包的定义遵循以下语法：</p><pre><code class="language-Groovy">{ [closureParameters -&gt; ] statements }
+</code></pre><p><code>[closureParameters-&gt;]</code>是一个可选的逗号分隔的参数列表，语句是0个或者多个Groovy语句。这些参数看起来像方法的参数列表，这些参数类型可有可无。</p><p>当一个参数列表被指定，<code>-&gt;</code>符号是必须的，它能够在闭包体中提供分割参数的功能。<em>语句</em>部分由0个、1个或者许多个Groovy语句组成。</p><p>一些有效的闭包定义示例：</p><pre><code class="language-Groovy">{ item++ }                                          (1)
+{ -&gt; item++ }                                       (2)
+{ println it }                                      (3)
+{ it -&gt; println it }                                (4)
+{ name -&gt; println name }                            (5)
+{ String x, int y -&gt;                                (6)
+    println &quot;hey ${x} the value is ${y}&quot;
+}{ reader -&gt;                                         (7)
+    def line = reader.readLine()
+    line.trim()
+}
+</code></pre><table><thead><tr><th><strong>1</strong></th><th>引用名为<code>item</code>的变量的闭包</th></tr></thead><tbody><tr><td><strong>2</strong></td><td>可以通过添加箭头 (<code>-&gt;</code>) 将闭包参数与代码显式分开</td></tr><tr><td><strong>3</strong></td><td>使用隐式参数 (<code>it</code>) 的闭包</td></tr><tr><td><strong>4</strong></td><td><code>it</code>是显式参数的替代版本</td></tr><tr><td><strong>5</strong></td><td>在这种情况下，通常最好为参数使用显式名称</td></tr><tr><td><strong>6</strong></td><td>一个接受两个类型参数的闭包</td></tr><tr><td><strong>7</strong></td><td>一个闭包可以包含多个语句</td></tr></tbody></table><h3 id="12-闭包是一个对象">1.2. 闭包是一个对象</h3><p>闭包是<code>groovy.lang.Closure</code>类的一个实例，使它可以像任何其他变量一样分配给变量或字段，尽管它是一个代码块：</p><pre><code class="language-Groovy">def listener = { e -&gt; println &quot;Clicked on $e.source&quot; }      (1)
+assert listener instanceof Closure
+Closure callback = { println &#39;Done!&#39; }                      (2)
+Closure&lt;Boolean&gt; isTextFile = {
+    File it -&gt; it.name.endsWith(&#39;.txt&#39;)                     (3)
+}
+</code></pre><table><thead><tr><th><strong>1</strong></th><th>你可以将闭包分配给变量，它是<code>groovy.lang.Closure</code>的一个实例</th></tr></thead><tbody><tr><td><strong>2</strong></td><td>如果不使用<code>def</code>或<code>var</code>，请使用<code>groovy.lang.Closure</code>作为类型</td></tr><tr><td><strong>3</strong></td><td>或者，你可以使用<code>groovy.lang.Closure</code>的泛型类型指定闭包的返回类型</td></tr></tbody></table><h3 id="13-调用一个闭包">1.3. 调用一个闭包</h3><p>一个闭包，作为一个匿名的代码块，可以像其他任何方法一样被调用。如果你定义一个不带任何参数的闭包，像这样：</p><pre><code class="language-Groovy">def code = { 123 }
+</code></pre><p>闭包中的代码只有当你<em>调用</em>的时候才会执行，这可以使用变量来实现，就像它是一个常规方法一样：</p><pre><code class="language-Groovy">assert code() == 123
+</code></pre><p>或者，你可以显式地使用<code>call</code>方法：</p><pre><code class="language-Groovy">assert code.call() == 123
+</code></pre><p>如果闭包接受参数，原则是一样的：</p><pre><code class="language-Groovy">def isOdd = { int i -&gt; i%2 != 0 }                           (1)
+assert isOdd(3) == true                                     (2)
+assert isOdd.call(2) == false                               (3)
+def isEven = { it%2 == 0 }                                  (4)
+assert isEven(3) == false                                   (5)
+assert isEven.call(2) == true                               (6)
+</code></pre><table><thead><tr><th><strong>1</strong></th><th>定义一个接受<code>int</code>作为参数的闭包</th></tr></thead><tbody><tr><td><strong>2</strong></td><td>可以直接调用</td></tr><tr><td><strong>3</strong></td><td>或者使用<code>call</code>方法</td></tr><tr><td><strong>4</strong></td><td>带有隐式参数（<code>it</code>）的闭包也是如此</td></tr><tr><td><strong>5</strong></td><td>可以使用 (<code>arg</code>) 直接调用</td></tr><tr><td><strong>6</strong></td><td>或使用<code>call</code></td></tr></tbody></table><p>与方法不同，闭包在调用时<strong>总是</strong>返回一个值。下一节讨论如何声明闭包参数，何时使用它们以及什么是隐式“it”参数。</p><h2 id="2-参数">2. 参数</h2><h3 id="21-正常参数">2.1. 正常参数</h3><p>闭包的参数遵循与常规方法的参数相同的原则：</p><ul><li>可选类型</li><li>一个名字</li><li>可选的默认值</li></ul><p>参数用逗号分隔：</p><pre><code class="language-Groovy">def closureWithOneArg = { str -&gt; str.toUpperCase() }
+assert closureWithOneArg(&#39;groovy&#39;) == &#39;GROOVY&#39;def closureWithOneArgAndExplicitType = { String str -&gt; str.toUpperCase() }
+assert closureWithOneArgAndExplicitType(&#39;groovy&#39;) == &#39;GROOVY&#39;def closureWithTwoArgs = { a,b -&gt; a+b }
+assert closureWithTwoArgs(1,2) == 3def closureWithTwoArgsAndExplicitTypes = { int a, int b -&gt; a+b }
+assert closureWithTwoArgsAndExplicitTypes(1,2) == 3def closureWithTwoArgsAndOptionalTypes = { a, int b -&gt; a+b }
+assert closureWithTwoArgsAndOptionalTypes(1,2) == 3def closureWithTwoArgAndDefaultValue = { int a, int b=2 -&gt; a+b }
+assert closureWithTwoArgAndDefaultValue(1) == 3
+</code></pre><h3 id="22-隐式参数">2.2. 隐式参数</h3><p>当一个闭包没有显示的声明参数列表（使用<code>-&gt;</code>），一个闭包<strong>总是</strong>定义了一个隐式的参数，叫做<code>it</code>。这意味着以下代码：</p><pre><code class="language-Groovy">def greeting = { &quot;Hello, $it!&quot; }
+assert greeting(&#39;Patrick&#39;) == &#39;Hello, Patrick!&#39;
+</code></pre><p>严格等同于这个：</p><pre><code class="language-Groovy">def greeting = { it -&gt; &quot;Hello, $it!&quot; }
+assert greeting(&#39;Patrick&#39;) == &#39;Hello, Patrick!&#39;
+</code></pre><p>如果你想声明一个不接受参数并且必须限制为不带参数调用的闭包，那么你<strong>必须</strong>用一个显式的空参数列表声明它：</p><pre><code class="language-Groovy">def magicNumber = { -&gt; 42 }// this call will fail because the closure doesn&#39;t accept any argument
+magicNumber(11)
+</code></pre><h3 id="23-varargs">2.3. Varargs</h3><p>闭包可以像任何其他方法一样声明变量参数。如果最后一个参数是可变长度（或数组），则<em>Vargs</em>方法是可以接受可变数量参数的方法，如下例所示：</p><pre><code class="language-Groovy">def concat1 = { String... args -&gt; args.join(&#39;&#39;) }           (1)
+assert concat1(&#39;abc&#39;,&#39;def&#39;) == &#39;abcdef&#39;                     (2)
+def concat2 = { String[] args -&gt; args.join(&#39;&#39;) }            (3)
+assert concat2(&#39;abc&#39;, &#39;def&#39;) == &#39;abcdef&#39;def multiConcat = { int n, String... args -&gt;                (4)
+    args.join(&#39;&#39;)*n
+}
+assert multiConcat(2, &#39;abc&#39;,&#39;def&#39;) == &#39;abcdefabcdef&#39;
+</code></pre><table><thead><tr><th><strong>1</strong></th><th>接受可变数量的字符串作为第一个参数的闭包</th></tr></thead><tbody><tr><td><strong>2</strong></td><td>可以使用任意数量的参数调用它，而<strong>无需</strong>将它们显式包装到数组中</td></tr><tr><td><strong>3</strong></td><td>如果将<em>args</em>参数声明为数组，则可以直接使用相同的行为</td></tr><tr><td><strong>4</strong></td><td>只要<strong>最后</strong>一个参数是数组或显式 vargs 类型</td></tr></tbody></table><h2 id="3-委托策略">3. 委托策略</h2><h3 id="31-groovy闭包-vs-lambda表达式">3.1. Groovy闭包 vs lambda表达式</h3><p>Groovy将闭包定义为Closure类的实例。这使得它跟<a href="https://docs.oracle.com/javase/tutorial/java/javaOO/lambdaexpressions.html">lambda expressions in Java 8</a>非常的不一样。委托在Groovy闭包中是一个跟lambda不相同的重要概念。<em>更改委托</em>或<em>更改闭包的委托策略</em>的能力使得在 Groovy 中设计漂亮的领域特定语言 (DSL) 成为可能。</p><h3 id="32-owner-delegate和this">3.2. Owner, delegate和this</h3><p>为了理解delegate的概念，我们首先必须解释下闭包中<code>this</code>的含义。一个闭包实际上定义了3个不同的东西：</p><ul><li><code>this</code>对应于定义闭包的<em>封闭类</em></li><li><code>owner</code>对应于定义闭包的<em>封闭对象</em>，可以是类也可以是闭包</li><li><code>delegate</code>对应于第三方对象，只要未定义消息的接收者，就会解析方法调用或属性</li></ul><h4 id="321-this的含义">3.2.1. this的含义</h4><p>在闭包中，调用<code>getThisObject</code>将会返回闭包定义的封闭类。它等效于使用显式<code>this</code>：</p><pre><code class="language-Groovy">class Enclosing {
+    void run() {
+        def whatIsThisObject = { getThisObject() }          (1)
+        assert whatIsThisObject() == this                   (2)
+        def whatIsThis = { this }                           (3)
+        assert whatIsThis() == this                         (4)
+    }
+}
+class EnclosedInInnerClass {
+    class Inner {
+        Closure cl = { this }                               (5)
+    }
+    void run() {
+        def inner = new Inner()
+        assert inner.cl() == inner                          (6)
+    }
+}
+class NestedClosures {
+    void run() {
+        def nestedClosures = {
+            def cl = { this }                               (7)
+            cl()
+        }
+        assert nestedClosures() == this                     (8)
+    }
+}
+</code></pre><table><thead><tr><th><strong>1</strong></th><th>在<code>Enclosure</code>类中定义了一个闭包，并返回<code>getThisObject</code></th></tr></thead><tbody><tr><td><strong>2</strong></td><td>调用闭包将返回定义闭包的<code>Enclosure</code>实例</td></tr><tr><td><strong>3</strong></td><td>通常，你只想使用<code>this</code>表示法的快捷方式</td></tr><tr><td><strong>4</strong></td><td>它返回<strong>完全</strong>相同的对象</td></tr><tr><td><strong>5</strong></td><td>如果闭包是在内部类中定义的</td></tr><tr><td><strong>6</strong></td><td>闭包中的<code>this</code>​<strong>将</strong>返回内部类，而不是顶级类</td></tr><tr><td><strong>7</strong></td><td>在嵌套闭包的情况下，就像这里<code>cl</code>被定义在<code>NestedClosures</code>的范围内</td></tr><tr><td><strong>8</strong></td><td>那么<code>this</code>对应于最近的外部类，而不是封闭的闭包！</td></tr></tbody></table><p>当然可以这样调用闭包类中的方法：</p><pre><code class="language-Groovy">class Person {
+    String name
+    int age
+    String toString() { &quot;$name is $age years old&quot; }
+
+    String dump() {
+        def cl = {
+            String msg = this.toString()               (1)
+            println msg
+            msg
+        }
+        cl()
+    }
+}
+def p = new Person(name:&#39;Janice&#39;, age:74)
+assert p.dump() == &#39;Janice is 74 years old&#39;
+</code></pre><table><thead><tr><th><strong>1</strong></th><th>闭包在<code>this</code>上调用<code>toString</code>，这实际上会在封闭对象上调用<code>toString</code>方法，即<code>Person</code>实例</th></tr></thead></table><h4 id="322-闭包的所有者owner">3.2.2. 闭包的所有者Owner</h4><p>闭包的owner与闭包中this的定义非常相似，但有细微差别：它将返回直接封闭的对象，无论是闭包还是类：</p><pre><code class="language-Groovy">class Enclosing {
+    void run() {
+        def whatIsOwnerMethod = { getOwner() }               (1)
+        assert whatIsOwnerMethod() == this                   (2)
+        def whatIsOwner = { owner }                          (3)
+        assert whatIsOwner() == this                         (4)
+    }
+}
+class EnclosedInInnerClass {
+    class Inner {
+        Closure cl = { owner }                               (5)
+    }
+    void run() {
+        def inner = new Inner()
+        assert inner.cl() == inner                           (6)
+    }
+}
+class NestedClosures {
+    void run() {
+        def nestedClosures = {
+            def cl = { owner }                               (7)
+            cl()
+        }
+        assert nestedClosures() == nestedClosures            (8)
+    }
+}
+</code></pre><table><thead><tr><th><strong>1</strong></th><th>在<code>Enclosure</code>类中定义了一个闭包，并返回<code>getOwner</code></th></tr></thead><tbody><tr><td><strong>2</strong></td><td>调用闭包将返回定义闭包的<code>Enclosure</code>实例</td></tr><tr><td><strong>3</strong></td><td>通常，你只想使用快捷方式<code>owener</code>表示法</td></tr><tr><td><strong>4</strong></td><td>它返回<strong>完全</strong>相同的对象</td></tr><tr><td><strong>5</strong></td><td>如果闭包是在内部类中定义的</td></tr><tr><td><strong>6</strong></td><td>闭包中的<code>owener</code>​<strong>将</strong>返回内部类，而不是顶级类</td></tr><tr><td><strong>7</strong></td><td>但是在<code>nestedClosures</code>的情况下，就像这里<code>cl</code>被定义在嵌套闭包的范围内</td></tr><tr><td><strong>8</strong></td><td>那么<code>owner</code>对应于封闭的闭包，因此与<code>this</code>不同的对象！</td></tr></tbody></table><h4 id="323-闭包的委托delegate">3.2.3. 闭包的委托Delegate</h4><p>可以使用委托属性或调用<code>getDelegate</code>方法来访问闭包的委托。它是在 Groovy 中构建特定领域语言的强大概念。虽然this和owner指的是闭包的词法范围，但委托是闭包将使用的用户定义对象。默认情况下，委托设置为<code>owener</code>：</p><pre><code class="language-Groovy">class Enclosing {
+    void run() {
+        def cl = { getDelegate() }                          (1)
+        def cl2 = { delegate }                              (2)
+        assert cl() == cl2()                                (3)
+        assert cl() == this                                 (4)
+        def enclosed = {
+            { -&gt; delegate }.call()                          (5)
+        }
+        assert enclosed() == enclosed                       (6)
+    }
+}
+</code></pre><table><thead><tr><th><strong>1</strong></th><th>你可以通过调用<code>getDelegate</code>方法获取闭包的委托</th></tr></thead><tbody><tr><td><strong>2</strong></td><td>或使用<code>delegate</code>属性</td></tr><tr><td><strong>3</strong></td><td>两者都返回相同的对象</td></tr><tr><td><strong>4</strong></td><td>这是封闭类或闭包</td></tr><tr><td><strong>5</strong></td><td>特别是在嵌套闭包的情况下</td></tr><tr><td><strong>6</strong></td><td><code>delegate</code>将对应于<code>owner</code></td></tr></tbody></table><p>闭包的委托可以更改为<strong>任何对象</strong>。让我们通过创建两个类来说明这一点，它们不是彼此的子类，但都定义了一个名为<code>name</code>的属性：</p><pre><code class="language-Groovy">class Person {
+    String name
+}
+class Thing {
+    String name
+}def p = new Person(name: &#39;Norman&#39;)
+def t = new Thing(name: &#39;Teapot&#39;)
+</code></pre><p>然后让我们定义一个闭包来获取委托上的<code>name</code>属性：</p><pre><code class="language-Groovy">def upperCasedName = { delegate.name.toUpperCase() }
+</code></pre><p>然后通过更改闭包的委托，可以看到目标对象会发生变化：</p><pre><code class="language-Groovy">upperCasedName.delegate = p
+assert upperCasedName() == &#39;NORMAN&#39;
+upperCasedName.delegate = t
+assert upperCasedName() == &#39;TEAPOT&#39;
+</code></pre><p>此时，行为与在闭包的词法范围中定义<code>target</code>变量没有什么不同：</p><pre><code class="language-Groovy">def target = p
+def upperCasedNameUsingVar = { target.name.toUpperCase() }
+assert upperCasedNameUsingVar() == &#39;NORMAN&#39;
+</code></pre><p>但是，有主要区别：</p><ul><li>在最后一个示例中，<em>target</em>是从闭包内引用的局部变量</li><li>委托可以透明地使用，也就是说，无需在方法调用前加上<code>delegate</code>。如下一段所述。</li></ul><h4 id="324-委托策略">3.2.4. 委托策略</h4><p>每当在闭包中访问一个属性而不显式设置接收器对象时，就会涉及到委托策略：</p><pre><code class="language-Groovy">class Person {
+    String name
+}
+def p = new Person(name:&#39;Igor&#39;)
+def cl = { name.toUpperCase() }                 (1)
+cl.delegate = p                                 (2)
+assert cl() == &#39;IGOR&#39;                           (3)
+</code></pre><table><thead><tr><th><strong>1</strong></th><th><code>name</code>没有引用闭包词法范围内的变量</th></tr></thead><tbody><tr><td><strong>2</strong></td><td>我们可以将闭包的委托更改为<code>Person</code>的实例</td></tr><tr><td><strong>3</strong></td><td>并且方法调用会成功</td></tr></tbody></table><p>此代码有效的原因是<code>name</code>属性将在<code>delegate</code>对象上透明地解析！这是解决闭包内的属性或方法调用的一种非常强大的方法。无需设置显式<code>delegate</code>。接收者：将进行调用，因为闭包的默认委托策略使其如此。闭包实际上定义了多种解决策略，你可以选择：</p><ul><li><code>Closure.OWNER_FIRST</code>是<strong>默认策略</strong>。如果<strong>owner</strong>上存在属性/方法，那么它将在owner上调用。如果不是，则使用<strong>delegate</strong>。</li><li><code>Closure.DELEGATE_FIRST</code>反转逻辑：先使用<strong>delegate</strong>，然后使用<strong>owner</strong></li><li><code>Closure.OWNER_ONLY</code>只会解析所有者的属性/方法查找：委托将被忽略。</li><li><code>Closure.DELEGATE_ONLY</code>只会解析委托上的属性/方法查找：所有者将被忽略。</li><li><code>Closure.TO_SELF</code>可供需要高级元编程技术并希望实现自定义解析策略的开发人员使用：解析不会针对所有者或委托，而只会针对闭包类本身。如果你实现自己的<code>Closure</code>子类，则使用它才有意义。</li></ul><p>让我们用这段代码来说明默认的“所有者优先”策略：</p><pre><code class="language-Groovy">class Person {
+    String name
+    def pretty = { &quot;My name is $name&quot; }             (1)
+    String toString() {
+        pretty()
+    }
+}
+class Thing {
+    String name                                     (2)
+}def p = new Person(name: &#39;Sarah&#39;)
+def t = new Thing(name: &#39;Teapot&#39;)assert p.toString() == &#39;My name is Sarah&#39;           (3)
+p.pretty.delegate = t                               (4)
+assert p.toString() == &#39;My name is Sarah&#39;           (5)
+</code></pre><table><thead><tr><th><strong>1</strong></th><th>为了说明，我们定义了一个引用“name”的闭包成员</th></tr></thead><tbody><tr><td><strong>2</strong></td><td><code>Person</code>和<code>Thing</code>类都定义了一个<code>name</code>属性</td></tr><tr><td><strong>3</strong></td><td>使用默认策略，首先在所有者上解析<code>name</code>属性</td></tr><tr><td><strong>4</strong></td><td>因此，如果我们将<code>delegate</code>更改为<code>t</code>，它是<code>Thing</code>的一个实例</td></tr><tr><td><strong>5</strong></td><td>结果没有变化：<code>name</code>首先在闭包的<code>owner</code>上解析</td></tr></tbody></table><p>但是，可以更改闭包的解析策略：</p><pre><code class="language-Groovy">p.pretty.resolveStrategy = Closure.DELEGATE_FIRST
+assert p.toString() == &#39;My name is Teapot&#39;
+</code></pre><p>通过更改<code>resolveStrategy</code>，我们正在修改Groovy解析“隐式 this”引用的方式：在这种情况下，<code>name</code>将首先在委托中查找，如果未找到，则在所有者中查找。由于<code>name</code>是在委托中定义的，它是<code>Thing</code>的一个实例，因此使用此值。</p><p>如果其中一个委托人（或所有者）<strong>没有</strong>这样的方法或属性，则可以说明“委托优先”和“仅委托”或“所有者优先”和“仅所有者”之间的区别：</p><pre><code class="language-Groovy">class Person {
+    String name
+    int age
+    def fetchAge = { age }
+}
+class Thing {
+    String name
+}def p = new Person(name:&#39;Jessica&#39;, age:42)
+def t = new Thing(name:&#39;Printer&#39;)
+def cl = p.fetchAge
+cl.delegate = p
+assert cl() == 42
+cl.delegate = t
+assert cl() == 42
+cl.resolveStrategy = Closure.DELEGATE_ONLY
+cl.delegate = p
+assert cl() == 42
+cl.delegate = t
+try {
+    cl()
+    assert false
+} catch (MissingPropertyException ex) {
+    // &quot;age&quot; is not defined on the delegate
+}
+</code></pre><p>在这个例子中，我们定义了两个类，它们都有一个<code>name</code>属性，但只有<code>Person</code>类声明了一个<code>age</code>。<code>Person</code>类还声明了一个引用<code>age</code>的闭包。我们可以将默认的解决策略从“所有者优先”更改为“仅代表”。由于闭包的所有者是<code>Person</code>类，那么我们可以检查，如果委托是<code>Person</code>的实例，则调用闭包是成功的，但是如果我们以委托作为<code>Thing</code>的实例来调用它，它会失败并出现<code>groovy .lang.MissingPropertyException</code>。尽管在<code>Person</code>类中定义了闭包，但没有使用所有者。</p><h2 id="4-gstrings中的闭包">4. GStrings中的闭包</h2><p>采取以下代码：</p><pre><code class="language-Groovy">def x = 1
+def gs = &quot;x = ${x}&quot;
+assert gs == &#39;x = 1&#39;
+</code></pre><p>代码的行为与你预期的一样，但是如果你添加以下内容会发生什么：</p><pre><code class="language-Groovy">x = 2
+assert gs == &#39;x = 2&#39;
+</code></pre><p>你会看到断言失败了！有两个原因：</p><ul><li>GString仅懒惰地执行值的<code>toString</code>表示</li><li>GString 中的语法<code>${x}</code>​<strong>不</strong>代表闭包，而是<code>$x</code>的<strong>表达式</strong>，在创建GString时进行执行。</li></ul><p>在我们的示例中，<code>GString</code>是使用引用<code>x</code>的表达式创建的。创建<code>GString</code>时，<code>x</code>的<strong>值</strong>为 1，因此创建的<code>GString</code>的值为 1。触发断言时，执行<code>GString</code>并使用<code>toString</code>将 1 转换为<code>String</code>。当我们将<code>x</code>更改为 2 时，我们确实更改了<code>x</code>的值，但它是一个不同的对象，并且<code>GString</code>仍然引用旧的对象。</p><table><thead><tr><th><br></th><th>只有当<code>GString</code>引用的值发生变化时，<code>GString</code>才会更改其<code>toString</code>表示。如果引用发生变化，什么都不会发生。</th></tr></thead></table><p>如果你需要 GString 中的真正闭包，例如强制对变量进行惰性求值，则需要使用替代语法<code>${→ x}</code>，如固定示例中所示：</p><pre><code class="language-Groovy">def x = 1
+def gs = &quot;x = ${-&gt; x}&quot;
+assert gs == &#39;x = 1&#39;
+
+x = 2
+assert gs == &#39;x = 2&#39;
+</code></pre><p>让我们用这段代码来说明它与变体有何不同：</p><pre><code class="language-Groovy">class Person {
+    String name
+    String toString() { name }          (1)
+}
+def sam = new Person(name:&#39;Sam&#39;)        (2)
+def lucy = new Person(name:&#39;Lucy&#39;)      (3)
+def p = sam                             (4)
+def gs = &quot;Name: ${p}&quot;                   (5)
+assert gs == &#39;Name: Sam&#39;                (6)
+p = lucy                                (7)
+assert gs == &#39;Name: Sam&#39;                (8)
+sam.name = &#39;Lucy&#39;                       (9)
+assert gs == &#39;Name: Lucy&#39;               (10)
+</code></pre></div><footer class="wrapper post__footer"><p class="post__last-updated">This article was updated on 九月 26, 2024</p><div class="post__share"></div></footer><nav class="pagination"><div class="pagination__title"><span>Read other posts</span></div><div class="pagination__buttons"><a href="https://jobslee0.github.io/fan-yi-groovyying-yong-ji-cheng.html" class="btn previous" rel="prev" aria-label="[MISSING TRANSLATION]:  【翻译】Groovy应用集成 "><span class="btn__icon">←</span> <span class="btn__text">【翻译】Groovy应用集成</span> </a><a href="https://jobslee0.github.io/fan-yi-groovyying-yong-ji-cheng.html" class="btn next" rel="next" aria-label="[MISSING TRANSLATION]:  【翻译】Groovy应用集成 "><span class="btn__text">【翻译】Groovy应用集成</span> <span class="btn__icon">→</span></a></div></nav></article></main><footer class="footer"><div class="footer__inner"><div class="footer__copyright"><p>© 2024 Powered by Publii CMS :: <a href="https://github.com/panr/hugo-theme-terminal" target="_blank" rel="noopener">Theme</a> ported by the <a href="https://getpublii.com/customization-service/" target="_blank" rel="noopener">Publii Team</a></p></div></div></footer></div><script defer="defer" src="https://jobslee0.github.io/assets/js/scripts.min.js?v=c2232aa7558e9517946129d2a1b8c770"></script><script>window.publiiThemeMenuConfig={mobileMenuMode:'sidebar',animationSpeed:300,submenuWidth: 'auto',doubleClickTime:500,mobileMenuExpandableSubmenus:true,relatedContainerForOverlayMenuSelector:'.top'};</script><script>var images = document.querySelectorAll('img[loading]');
+        for (var i = 0; i < images.length; i++) {
+            if (images[i].complete) {
+                images[i].classList.add('is-loaded');
+            } else {
+                images[i].addEventListener('load', function () {
+                    this.classList.add('is-loaded');
+                }, false);
+            }
+        }</script></body></html>

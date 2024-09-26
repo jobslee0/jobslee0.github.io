@@ -1,0 +1,1563 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xmlns:media="http://search.yahoo.com/mrss/">
+    <title>Z.H.</title>
+    <link href="https://jobslee0.github.io/feed.xml" rel="self" />
+    <link href="https://jobslee0.github.io" />
+    <updated>2024-09-26T23:03:20+08:00</updated>
+    <author>
+        <name>Jobs.Lee</name>
+    </author>
+    <id>https://jobslee0.github.io</id>
+
+    <entry>
+        <title>PSQ队列简析</title>
+        <author>
+            <name>Jobs.Lee</name>
+        </author>
+        <link href="https://jobslee0.github.io/psqdui-lie-jian-xi.html"/>
+        <id>https://jobslee0.github.io/psqdui-lie-jian-xi.html</id>
+
+        <updated>2023-01-18T16:25:00+08:00</updated>
+            <summary>
+                <![CDATA[
+                    PSQ是友缘在线早些年，由大师独自编写的一个轻量级队列，该队列开箱即用、效率高，可以达到每秒并发40000-50000个请求，并开创性提供了队列回溯消费的功能。 在 LeanSoft BigQueue 中，Memory mapped&hellip;
+                ]]>
+            </summary>
+        <content type="html">
+            <![CDATA[
+                <p>PSQ是友缘在线早些年，由大师独自编写的一个轻量级队列，该队列开箱即用、效率高，可以达到每秒并发40000-50000个请求，并开创性提供了队列回溯消费的功能。</p><h3 id="技术架构">技术架构</h3>
+<figure class="post__image"><img loading="lazy" src="https://s2.51cto.com/images/blog/front/202404/11253a554aa26681360317cd2232534fef9255.png?x-oss-process=image/watermark,size_14,text_QDUxQ1RP5Y2a5a6i,color_FFFFFF,t_30,g_se,x_10,y_10,shadow_20,type_ZmFuZ3poZW5naGVpdGk=,x-oss-process=image/resize,m_fixed,w_1184/format,webp" alt=""  data-is-external-image="true"></figure><h3 id="核心原理">核心原理</h3>
+<ol>
+<li>底层数据结构：最底层使用了leansoft.bigqueue，此队列基于内存映射文件，实现了LRU及页映射特性</li>
+<li>数据结构扩展：基于原始队列，构建环形队列，并支持回溯、持久化（使用NIO）特性</li>
+<li>网络接口：网络接口基于Netty实现，根据参数定制对应消息对象，由于NIO的模型特性，网络IO效率非常的高</li>
+<li>服务包装：服务使用tanukisoftware.wrapper进行了包装，启动比较轻巧，可以很好的跟操作系统融合</li>
+<li>扩展特性：系统使用JMX扩展进行了Bean的监控和管理，有效提高了系统的可操作性</li>
+</ol>
+<h3 id="磁盘与内存">磁盘与内存</h3>
+<p>在 LeanSoft BigQueue 中，Memory mapped page 是一种利用内存映射文件实现的存储方式。它允许应用程序映射一个磁盘文件到内存，从而避免从磁盘读取数据的慢速过程。通过使用 Memory mapped page，LeanSoft BigQueue 可以在内存和磁盘之间平衡读写性能，从而提高吞吐量。</p><p>Java 中可以使用 <code>FileChannel</code> 类刷新直接内存到磁盘。你可以使用该类打开一个文件，并使用 <code>map</code> 方法将该文件映射到直接内存。然后，你可以使用该内存中的数据进行操作，并通过调用 <code>force</code> 方法将其写入磁盘。</p><p>以下是使用直接内存和 FileChannel 类的示例代码：</p><pre><code class="language-java">import java.io.File;
+import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.nio.MappedByteBuffer;
+import java.nio.channels.FileChannel;
+
+public class DirectMemoryExample {
+
+    public static void main(String[] args) throws IOException {
+        File file = new File(&quot;data.dat&quot;);
+
+        // Open the file and map it to memory
+        RandomAccessFile raf = new RandomAccessFile(file, &quot;rw&quot;);
+        FileChannel channel = raf.getChannel();
+        MappedByteBuffer buffer = channel.map(FileChannel.MapMode.READ_WRITE, 0, 1024);
+
+        // Write data to the memory
+        buffer.putInt(100);
+        buffer.putInt(200);
+
+        // Flush the changes to disk
+        buffer.force();
+
+        // Close the file
+        channel.close();
+        raf.close();
+    }
+}
+</code></pre>
+<h3 id="项目地址">项目地址</h3>
+<p><a href="https://github.com/wjw465150/PSQueueServer">PSQueueServer</a>
+<a href="https://github.com/wjw465150/PSQueueClient">PSQueueClient</a></p>
+            ]]>
+        </content>
+    </entry>
+    <entry>
+        <title>记一次JVM堆外内存泄漏问题</title>
+        <author>
+            <name>Jobs.Lee</name>
+        </author>
+        <link href="https://jobslee0.github.io/ji-yi-ci-jvmdui-wai-nei-cun-xie-lou-wen-ti.html"/>
+        <id>https://jobslee0.github.io/ji-yi-ci-jvmdui-wai-nei-cun-xie-lou-wen-ti.html</id>
+
+        <updated>2023-01-10T16:22:00+08:00</updated>
+            <summary>
+                <![CDATA[
+                    问题现象 前段时间，公司线上的服务器开始出现pod反复重启的现象，但是没有JVM内存泄漏的日志，也没有找到OOM的dump文件，只有一条容器被kill的日志。通过普罗米修斯监控大盘，发现是JVM内存突破了pod的内存限制。 我们的应用服务是使用k8s来部署的，应用是基于jdk8的，出现问题的服务pod分配的总数为3台，每个pod分配3G内存和1个高性能CPU，pod的内存required和limit分别为2G和3G。 默认参数，未配置。 年轻代正常；老年代占用较多，可能有大对象存在；老年代内存增长同pod增长趋势相同，且有按小时增长迹象，并会触发FullGC。 保持上面的解决方案和参数，我们的服务勉强保持了一段时间，只是相对拉长了容器被重启的时间，告警和重启依然存在，实在令人头疼，很明显还是存在JVM内存泄漏。&hellip;
+                ]]>
+            </summary>
+        <content type="html">
+            <![CDATA[
+                <h3 id="问题现象">问题现象</h3>
+<p>前段时间，公司线上的服务器开始出现pod反复重启的现象，但是没有JVM内存泄漏的日志，也没有找到OOM的dump文件，只有一条容器被kill的日志。通过普罗米修斯监控大盘，发现是JVM内存突破了pod的内存限制。</p><h3 id="问题分析">问题分析</h3>
+<h4 id="现象分析">现象分析</h4>
+<ol>
+<li>硬件配置</li>
+</ol>
+<p>我们的应用服务是使用k8s来部署的，应用是基于jdk8的，出现问题的服务pod分配的总数为3台，每个pod分配3G内存和1个高性能CPU，pod的内存required和limit分别为2G和3G。</p><ol start="2">
+<li>JVM参数</li>
+</ol>
+<p>默认参数，未配置。</p><ol start="3">
+<li>JVM内存分析</li>
+</ol>
+<p>年轻代正常；老年代占用较多，可能有大对象存在；老年代内存增长同pod增长趋势相同，且有按小时增长迹象，并会触发FullGC。</p><h4 id="问题猜测">问题猜测</h4>
+<ol>
+<li>随着业务增长，pod内存可能确实不足</li>
+<li>JVM默认参数无法有效限制JVM的内存使用</li>
+<li>某个小时任务存在问题，且使用了大对象</li>
+<li>大对象触发FullGC后并没有有效释放内存</li>
+<li>查询k8s官方Issues，是否存在pod与Java版本兼容bug</li>
+</ol>
+<h4 id="尝试解决">尝试解决</h4>
+<ol>
+<li>增加pod内存，使得<code>required=4G</code> <code>limit=5G</code></li>
+<li>增加JVM参数限制<code>-Xms=4G</code> <code>-Xmx=4G</code>，堆外内存也要限制，（特别注意jdk8为元空间）<code>-XX:MetaspaceSize=300m</code> <code>-XX:MaxMetaspaceSize=300m</code></li>
+<li>翻查代码，确实发现某个定时任务存在着大批量的List内存存储，且长时间不释放，但是短时间内没有较好的修改替代方案</li>
+<li>调整年轻代大小<code>-Xmn</code>，使大对象在年轻代就被回收，而不进入老年代</li>
+<li>升级jdk8的小版本，<code>提升jvm对容器限制的感知</code>（这块见参考文档3）</li>
+</ol>
+<h4 id="尝试结果">尝试结果</h4>
+<ol>
+<li>JVM内存增长导致的重启次数变得减少一点，部分FullGC之后pod容器依然健在，但是时间久了依然会被kill重启</li>
+<li>大对象没有被提前回收，依然进入了老年代，且FullGC明显增多</li>
+</ol>
+<h4 id="初步结论">初步结论</h4>
+<ol>
+<li>业务增长<strong>pod内存</strong>确实需要适当增加</li>
+<li><strong>JVM参数</strong>需要进行手动限制，但是年轻代大小可以不需要调整，反而可以降低FullGC次数</li>
+<li><strong>代码端</strong>想更好的优化方法，尽量让数据对象生命周期缩短，但是改动较难</li>
+<li>jdk8小版本有对<strong>容器限制感知</strong>的修复，有一定用处（这块见参考文档3）</li>
+</ol>
+<h3 id="问题解决">问题解决</h3>
+<p>保持上面的解决方案和参数，我们的服务勉强保持了一段时间，只是相对拉长了容器被重启的时间，告警和重启依然存在，实在令人头疼，很明显还是存在JVM内存泄漏。</p><p>后来通过不断的排查监控大盘，我发现堆内内存经过FullGC后，可以做到到达临界线后不再增长，这说明了<strong>堆内参数大小和限制</strong>都起到了很好的作用；但是要知道，JVM还有一部分叫做<strong>堆外内存</strong>的东西，参数中限制了我们常知道的<strong>MetaSpace</strong>，在大盘中我却发现了<strong>non-heap memory</strong>部分总有比MetaSpace多出的300M，其增长趋势同pod内存一样一致，只是不是那么明显。</p><p>这引发了我进一步的思考，堆外内存是不是除了<strong>元数据区</strong>，还有一块未曾想到的区域？</p><p>经过翻查资料：</p><figure class="post__image"><img loading="lazy" src="https://s2.51cto.com/images/blog/front/202404/181492b213cbc6520373818bd65550e8b23c7a.png?x-oss-process=image/watermark,size_14,text_QDUxQ1RP5Y2a5a6i,color_FFFFFF,t_30,g_se,x_10,y_10,shadow_20,type_ZmFuZ3poZW5naGVpdGk=,x-oss-process=image/resize,m_fixed,w_1184" alt=""  data-is-external-image="true"></figure><p>发现有一块叫做<strong>Direct Memory</strong>的区域，这块区域就是我们常提到的<strong>NIO</strong>为了减少内存拷贝而直接申请的部分，这部分在常见数据库读写客户端中大量存在。</p><p>通过排查代码，果不其然，代码除了保留List大对象之外，还大量使用了<strong>RedisTemplate</strong>对象，这个客户端底层连接<strong>基于netty实现</strong>，正是NIO那部分。</p><p>于是，加上<code>-MaxDirectMemorySize</code>参数后，再次测试，JVM内存稳固被限制，果然没有问题了！而这个参数正是《深入理解JVM虚拟机》前几页所提到的——很多程序员会忽略的一个参数。</p><h3 id="问题总结">问题总结</h3>
+<p>总的来看，这次的问题DirectMemory是一个主要问题，代码的大对象处理是一个次要问题，其次才应该考虑对JVM的FullGC次数进行优化。</p><p>毕竟，JVM是一个复杂的大工程，它已经帮我们很好的完成了对内存的管理；出现了内存泄漏不可怕，要从现象和问题本身出发，要从JVM本身出发，万万不能被所谓的“八股文”和“权威”给束缚住，上来就考虑GC优化往往只会迷失方向。</p><p>那些被刻板经验给忽略的，往往就是真相，仅此而已。</p><hr>
+<h5 id="参考文档">参考文档</h5>
+<ol>
+<li><a href="https://blog.csdn.net/tterminator/article/details/54342666">https://blog.csdn.net/tterminator/article/details/54342666</a></li>
+<li><a href="https://zhuanlan.zhihu.com/p/370241822">https://zhuanlan.zhihu.com/p/370241822</a></li>
+<li><a href="https://blog.51cto.com/lookingdream/4046529">https://blog.51cto.com/lookingdream/4046529</a></li>
+<li><a href="https://juejin.cn/post/6844903894863052814%E2%80%8B%E2%80%8B">https://juejin.cn/post/6844903894863052814</a></li>
+<li><a href="https://www.processon.com/view/link/5b61ea2ae4b0555b39cfa842">https://www.processon.com/view/link/5b61ea2ae4b0555b39cfa842</a></li>
+</ol>
+
+            ]]>
+        </content>
+    </entry>
+    <entry>
+        <title>MongoDB之实战问答</title>
+        <author>
+            <name>Jobs.Lee</name>
+        </author>
+        <link href="https://jobslee0.github.io/mongodbzhi-shi-zhan-wen-da.html"/>
+        <id>https://jobslee0.github.io/mongodbzhi-shi-zhan-wen-da.html</id>
+
+        <updated>2023-01-10T14:58:00+08:00</updated>
+            <summary>
+                <![CDATA[
+                    MongoDB底层实现是B树还是B+树？ 答：B+树 这个问题国内论坛真的是难以找到靠谱的答案，大部分给出的都是不准确的B树，当然B+树确实是B树的一种，但是准确的说当前版本MongoDB底层实现应该是B+树才是准确的。 下面来给出具体的说明： 我们知道MongoDB当下支持两种引擎，一个是默认的WiredTiger，另一个是In-Memory，In-Memory是保存在内存中，我们平时讨论和使用的是默认的WiredTiger（本讨论从MongoDB3.2将WiredTiger作为默认引擎的前提下展开，至于老版本的数据结构这里忽略掉）。 WiredTiger文档中有这么一句话：&hellip;
+                ]]>
+            </summary>
+        <content type="html">
+            <![CDATA[
+                <h3 id="mongodb底层实现是b树还是b树？">MongoDB底层实现是B树还是B+树？</h3>
+<p>答：<strong>B+树</strong></p><p>这个问题国内论坛真的是难以找到靠谱的答案，大部分给出的都是不准确的B树，当然B+树确实是B树的一种，但是准确的说当前版本MongoDB底层实现应该是B+树才是准确的。</p><p>下面来给出具体的说明：</p><p>我们知道MongoDB当下支持两种引擎，一个是默认的WiredTiger，另一个是In-Memory，In-Memory是保存在内存中，我们平时讨论和使用的是默认的WiredTiger（本讨论从MongoDB3.2将WiredTiger作为默认引擎的前提下展开，至于老版本的数据结构这里忽略掉）。</p><p>WiredTiger文档中有这么一句话：</p><figure class="post__image"><img loading="lazy" src="assets/network-asset-71538864872aa7a87a1077a9a2815202c00a2f-20240926225858-m4ciqir.png" alt=""  data-is-external-image="true"></figure><p>大概意思就是使用称为B-Tree（具体为B+Tree）的数据结构在内存中维护表的数据，这直接说明了具体的数据结构应该为B+树，只不过B+树是B树的一种变形而已。</p><h3 id="mongodb大数据量分页怎么做？">MongoDB大数据量分页怎么做？</h3>
+<ol>
+<li>count语法会导致全局扫表，<strong>不建议使用count做页码总数的统计</strong>；</li>
+<li>对于不带条件的全局数据统计，<strong>建议使用estimatedDocumentCount</strong>；</li>
+<li>使用自定义带索引的标识或者_id中包含的时间戳，作为范围查询的条件，并往后limit有限条数据。</li>
+</ol>
+<h3 id="mongodb是否需要自行实现_id来提升性能？">MongoDB是否需要自行实现_id来提升性能？</h3>
+<p>答：<strong>不需要</strong></p><p>_id基于MongoDB自定义的规则实现，插入时直接生成，无需检查重复，效率已经足够。具体可参照前篇MongoDB文章。</p><h3 id="mongodb读写分离有延迟怎么办？">MongoDB读写分离有延迟怎么办？</h3>
+<ol>
+<li>检查服务器间网络是否正常</li>
+<li>检查服务器磁盘是否正常</li>
+<li>通过节点<strong>opLog日志</strong>排查是否同步正常</li>
+<li>升级4.4版本使用<strong>流复制</strong>提升效率</li>
+<li>读写分离这种主从部署的方式，在新版本中已经不建议使用，<strong>建议使用副本集</strong>进行读写</li>
+</ol>
+<h3 id="mongodb大数据量写索引慢有什么办法解决？">MongoDB大数据量写索引慢有什么办法解决？</h3>
+<ol>
+<li>MongoDB在写入索引的时候<strong>存在阻塞</strong>，所以最开始设计就要考虑合理的索引设计</li>
+<li>对于不太关注历史数据的数据库，可以<strong>使用部分索引</strong>，减少索引构建的数据量</li>
+<li><strong>定期清理</strong>数据，减少数据量</li>
+</ol>
+<h3 id="mongodb新版本有哪些需要关注的新特性？">MongoDB新版本有哪些需要关注的新特性？</h3>
+<ol>
+<li><a href="https://www.mongodb.com/docs/manual/core/capped-collections/">6.0版本-上限集合</a></li>
+<li><a href="https://www.mongodb.com/docs/manual/core/timeseries-collections/">5.0版本-时间序列</a></li>
+<li><a href="https://www.mongodb.com/docs/manual/core/replica-set-sync/">4.4版本-流复制</a></li>
+</ol>
+
+            ]]>
+        </content>
+    </entry>
+    <entry>
+        <title>MongoDB之巧用ObjectId</title>
+        <author>
+            <name>Jobs.Lee</name>
+        </author>
+        <link href="https://jobslee0.github.io/mongodbzhi-objectidxiang-jie.html"/>
+        <id>https://jobslee0.github.io/mongodbzhi-objectidxiang-jie.html</id>
+
+        <updated>2023-01-10T11:15:00+08:00</updated>
+            <summary>
+                <![CDATA[
+                    在MongoDB默认的document中，有一个叫做_id的字段，这个字段乍一看是一个随机的字符串，其实在MongoDB中却是含有特殊含义的且具有文档数据唯一标识意义的主键。 在默认情况下，这个id可以拿来做很多有趣的事情；同时，在某些情况下，我们甚至可以人工干预_id的生成。 _id在MongoDB中对应的是ObjectId字段（在MongoDB的Shell模式下，描述为ObjectId(&quot;HEX_STR&quot;)，在扩展JSON模式下，描述为$oid:&quot;HEX_STR&quot;）。其本质是一个12字节的数据串，分别由4字节时间戳+5字节随机值+3字节递增计数组成。 举一个例子： ObjectId(&quot;507f1f77bcf86cd799439011&quot;) 先来理解一个基础计算公式：&hellip;
+                ]]>
+            </summary>
+        <content type="html">
+            <![CDATA[
+                <p>在MongoDB默认的document中，有一个叫做<code>_id</code>的字段，这个字段乍一看是一个随机的字符串，其实在MongoDB中却是<strong>含有特殊含义的</strong>且<strong>具有文档数据唯一标识</strong>意义的主键。</p><p>在默认情况下，这个id可以拿来做很多有趣的事情；同时，在某些情况下，我们甚至可以人工干预<code>_id</code>的生成。</p><h3 id="objectid的组成">ObjectId的组成</h3>
+<p><code>_id</code>在MongoDB中对应的是<code>ObjectId</code>字段（在MongoDB的<em>Shell模式</em>下，描述为<code>ObjectId(&quot;HEX_STR&quot;)</code>，在<em>扩展JSON模式</em>下，描述为<code>$oid:&quot;HEX_STR&quot;</code>）。其本质是一个<strong>12字节</strong>的数据串，分别由<strong>4字节时间戳+5字节随机值+3字节递增计数</strong>组成。</p><p>举一个例子：</p><p><code>ObjectId(&quot;507f1f77bcf86cd799439011&quot;)</code></p><p>先来理解一个基础计算公式：</p><p>12byte*8bit=96bit</p><p>96bit/4bit=24个 <strong>十六进制字符</strong></p><p>然后我们来拆解十六进制字符串：</p><p><code>507f1f77</code> <code>bcf86cd799</code> <code>439011</code></p><p>下面开始分析：</p><p>前4字节（秒级别的unix时间戳）（4byte*8bit/4bit=8个十六进制字符）：</p><p><code>507f1f77</code></p><blockquote>
+<p>转换为十进制的秒时间戳就是 <code>1350508407</code> 也就是时间戳 <code>2012-10-18 05:13:27</code></p></blockquote>
+<p>中间5字节（生成的唯一的机器码和进程码）（5byte*8bit/4bit=10个十六进制字符）：</p><p><code>bcf86cd799</code></p><p>后3字节（初始化随机的递增计数值）（3byte*8bit/4bit=6个十六进制字符）：</p><p><code>439011</code></p><h3 id="objectid的作用">ObjectId的作用</h3>
+<blockquote>
+<p>MongoDB 在创建集合期间在<code>_id</code>字段上创建唯一索引。<code>_id</code>索引可防止客户端插入两个具有相同<code>_id</code>字段值的文档。因此不能在<code>_id</code>字段上删除此索引。</p></blockquote>
+<p>从官方文档可以看出，<code>_id</code>具有主键意义的存在，具有唯一性，会自动生成，同时自带唯一索引的特性，相对于普通索引，查询性能上较快。</p><h3 id="objectid的妙用">ObjectId的妙用</h3>
+<p>由以上的解析和文档参考，我们完全可以使用<code>_id</code>进行时间范围的数据查询。在某些业务场景中，若某一<strong>时间字段不存在</strong>或者<strong>不具备索引查询的特性</strong>，且<strong>创建索引代价巨大</strong>时，巧妙使用<code>_id</code>自带时间戳的特性，可以有效实现按时间范围的数据查询，而且效率很高。</p><p>具体的方法如下：</p><ol>
+<li>获取指定时间的时间戳（精确到秒）;</li>
+<li>把10位的时间戳转成16进制字符，得到4个字节；</li>
+<li>对4个字节（时间戳）后追加”0000000000000000”(8个字节)；</li>
+</ol>
+<p>举个实际查询的例子：</p><pre><code class="language-sql">db.record.find({&quot;_id&quot;:{$gte:ObjectId(&quot;62ffa5700000000000000000&quot;),$lt:ObjectId(&quot;62ffb3800000000000000000&quot;)}});
+</code></pre>
+<p>以上就实现了按照<code>_id</code>查询<code>2022-08-19 23:00:00</code>-<code>2022-08-20 00:00:00</code>时间范围的数据。</p><h3 id="自定义生成及注意事项">自定义生成及注意事项</h3>
+<ul>
+<li>使用 ObjectId</li>
+<li>如果可用，请使用自然唯一标识符。这节省了空间并避免了额外的索引</li>
+<li>生成一个自动递增的数字</li>
+<li>在您的应用程序代码中生成一个 UUID（为了在集合和 _id 索引中更有效地存储 UUID 值，请将 UUID 存储为 BSON BinData 类型的值）</li>
+<li>BinData 类型的索引键在以下情况下更有效地存储在索引中： 二进制子类型值在 0-7 或 128-135 的范围内，并且字节数组的长度为：0、1、2、3、4、5、6、7、8、10、12、14、16、20、24或32</li>
+<li>使用驱动程序的 BSON UUID 工具生成 UUID（请注意，驱动程序实现可能会以不同的方式实现 UUID 序列化和反序列化逻辑，这可能与其他驱动程序不完全兼容）</li>
+</ul>
+<blockquote>
+<p>在分片集群中，如果不使用<code>_id</code>字段作为分片键，那么应用程序必须确保<code>_id</code>字段中的值的唯一性以防止错误。这通常通过使用标准的自动生成的<code>ObjectId</code>来完成。</p></blockquote>
+<hr>
+<p>参考文档：</p><ol>
+<li><a href="https://www.mongodb.com/docs/manual/reference/method/ObjectId/">MongoDB Manual - ObjectId</a></li>
+<li><a href="https://www.mongodb.com/docs/manual/indexes/#default-_id-index">MongoDB Manual - default-_id-index</a></li>
+<li><a href="https://www.mongodb.com/docs/manual/core/document/#std-label-document-id-field">MongoDB Manual - std-label-document-id-field</a></li>
+<li><a href="https://blog.csdn.net/jiandequn/article/details/100142564">CSDN博客</a></li>
+</ol>
+
+            ]]>
+        </content>
+    </entry>
+    <entry>
+        <title>【翻译】Groovy应用集成</title>
+        <author>
+            <name>Jobs.Lee</name>
+        </author>
+        <link href="https://jobslee0.github.io/fan-yi-groovyying-yong-ji-cheng.html"/>
+        <id>https://jobslee0.github.io/fan-yi-groovyying-yong-ji-cheng.html</id>
+
+        <updated>2023-01-09T15:45:00+08:00</updated>
+            <summary>
+                <![CDATA[
+                    Groovy 语言提出了几种在运行时将自身集成到应用程序（Java 甚至 Groovy）中的方法，从最基本的简单代码执行到最完整的集成缓存和编译器定制。 这个groovy.util.Eval类是最简单的方式在运行时动态的执行Groovy。可以使用me方法： import&hellip;
+                ]]>
+            </summary>
+        <content type="html">
+            <![CDATA[
+                <p>Groovy 语言提出了几种在运行时将自身集成到应用程序（Java 甚至 Groovy）中的方法，从最基本的简单代码执行到最完整的集成缓存和编译器定制。</p><table>
+<thead>
+<tr>
+<th><br /></th>
+<th>本节中编写的所有示例都使用 Groovy，但可以在 Java 中使用相同的集成机制。</th>
+</tr>
+</thead>
+</table>
+<h3 id="11-eval">1.1. Eval</h3>
+<p>这个<code>groovy.util.Eval</code>类是最简单的方式在运行时动态的执行Groovy。可以使用<code>me</code>方法：</p><pre><code class="language-Plaintext">import groovy.util.Evalassert Eval.me(&#39;33*3&#39;) == 99
+assert Eval.me(&#39;&quot;foo&quot;.toUpperCase()&#39;) == &#39;FOO&#39;
+</code></pre>
+<p><code>Eval</code>支持多种参数接收变体来支持简易的表达式：</p><pre><code class="language-Plaintext">assert Eval.x(4, &#39;2*x&#39;) == 8                (1)
+assert Eval.me(&#39;k&#39;, 4, &#39;2*k&#39;) == 8          (2)
+assert Eval.xy(4, 5, &#39;x*y&#39;) == 20           (3)
+assert Eval.xyz(4, 5, 6, &#39;x*y+z&#39;) == 26     (4)
+</code></pre>
+<table>
+<thead>
+<tr>
+<th><strong>1</strong></th>
+<th>一个绑定了名称为<code>x</code>参数的简易表达式</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>2</strong></td>
+<td>跟上面的一样，一个绑定了名称为<code>k</code>参数的简易表达式</td>
+</tr>
+<tr>
+<td><strong>3</strong></td>
+<td>一个绑定了<code>x</code>和<code>y</code>两个绑定参数的简易表达式</td>
+</tr>
+<tr>
+<td><strong>4</strong></td>
+<td>一个绑定了<code>x</code>、<code>y</code>和<code>z</code>三个绑定参数的简易表达式</td>
+</tr>
+</tbody></table>
+<p><code>Eval</code>类使得执行简易的脚本变得容易，但是对于大规模的脚本不行：没有脚本缓存，而且不能执行超过一行的表达式。</p><h3 id="12-groovyshell">1.2. GroovyShell</h3>
+<h4 id="121-多种来源">1.2.1. 多种来源</h4>
+<p><code>groovy.lang.GroovyShell</code>类是执行脚本的首选方式，能够缓存生成的脚本实例。尽管<code>Eval</code>类能够返回编译后脚本的执行结果，<code>GroovyShell</code>可以提供更多的选择。</p><pre><code class="language-Plaintext">def shell = new GroovyShell()                           (1)
+def result = shell.evaluate &#39;3*5&#39;                       (2)
+def result2 = shell.evaluate(new StringReader(&#39;3*5&#39;))   (3)
+assert result == result2
+def script = shell.parse &#39;3*5&#39;                          (4)
+assert script instanceof groovy.lang.Script
+assert script.run() == 15                               (5)
+</code></pre>
+<table>
+<thead>
+<tr>
+<th><strong>1</strong></th>
+<th>创建一个新的<code>GroovyShell</code>实例</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>2</strong></td>
+<td>可以作为<code>Eval</code>直接执行代码</td>
+</tr>
+<tr>
+<td><strong>3</strong></td>
+<td>能够从很多源读取（<code>String</code>,<code>Reader</code>,<code>File</code>,<code>InputStream</code>）</td>
+</tr>
+<tr>
+<td><strong>4</strong></td>
+<td>可以延迟脚本的执行。使用<code>parse</code>方法返回一个<code>Script</code>实例</td>
+</tr>
+<tr>
+<td><strong>5</strong></td>
+<td><code>Script</code>定义了一个<code>run</code>方法</td>
+</tr>
+</tbody></table>
+<h4 id="122-在脚本和应用间共享数据">1.2.2. 在脚本和应用间共享数据</h4>
+<p>通过使用<code>groovy.lang.Binding</code>去在脚本和应用间共享数据：</p><pre><code class="language-Plaintext">def sharedData = new Binding()                          (1)
+def shell = new GroovyShell(sharedData)                 (2)
+def now = new Date()
+sharedData.setProperty(&#39;text&#39;, &#39;I am shared data!&#39;)     (3)
+sharedData.setProperty(&#39;date&#39;, now)                     (4)
+String result = shell.evaluate(&#39;&quot;At $date, $text&quot;&#39;)     (5)
+assert result == &quot;At $now, I am shared data!&quot;
+</code></pre>
+<table>
+<thead>
+<tr>
+<th><strong>1</strong></th>
+<th>创建一个包含共享数据的新<code>Binding</code></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>2</strong></td>
+<td>使用共享数据创建一个<code>GroovyShell</code></td>
+</tr>
+<tr>
+<td><strong>3</strong></td>
+<td>添加字符串到绑定中</td>
+</tr>
+<tr>
+<td><strong>4</strong></td>
+<td>添加一个日期到绑定中（你可以不必限制于简单的类型）</td>
+</tr>
+<tr>
+<td><strong>5</strong></td>
+<td>执行脚本</td>
+</tr>
+</tbody></table>
+<p>注意，也有可以在脚本中写入绑定：</p><pre><code class="language-Plaintext">def sharedData = new Binding()                          (1)
+def shell = new GroovyShell(sharedData)                 (2)
+
+shell.evaluate(&#39;foo=123&#39;)                               (3)
+assert sharedData.getProperty(&#39;foo&#39;) == 123             (4)
+</code></pre>
+<table>
+<thead>
+<tr>
+<th><strong>1</strong></th>
+<th>创建一个<code>Binding</code>实例</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>2</strong></td>
+<td>使用共享数据创建一个新的<code>GroovyShell</code></td>
+</tr>
+<tr>
+<td><strong>3</strong></td>
+<td>在绑定中使用一个<strong>未声明的</strong>变量去存储结果</td>
+</tr>
+<tr>
+<td><strong>4</strong></td>
+<td>在回调中读取结果</td>
+</tr>
+</tbody></table>
+<p>如果你想使用绑定，一个未声明变量是很重要的。像下面例子一样使用<code>def</code>或者<code>explicit</code>类型将会失败，因为你将会创建一个<em>本地</em>变量：</p><pre><code class="language-Plaintext">def sharedData = new Binding()
+def shell = new GroovyShell(sharedData)
+
+shell.evaluate(&#39;int foo=123&#39;)try {
+    assert sharedData.getProperty(&#39;foo&#39;)
+} catch (MissingPropertyException e) {
+    println &quot;foo is defined as a local variable&quot;
+}
+</code></pre>
+<table>
+<thead>
+<tr>
+<th><br /></th>
+<th>你在多线程中使用共享变量时必须非常小心。传递给<code>GroovyShell</code>的<code>Binding</code>实例不是线程安全的，会被所有的脚本共享。</th>
+</tr>
+</thead>
+</table>
+<p>可以通过利用<code>parse</code>返回的<code>Script</code>实例来解决<code>Binding</code>的共享实例：</p><pre><code class="language-Plaintext">def shell = new GroovyShell()def b1 = new Binding(x:3)                       (1)
+def b2 = new Binding(x:4)                       (2)
+def script = shell.parse(&#39;x = 2*x&#39;)
+script.binding = b1
+script.run()
+script.binding = b2
+script.run()
+assert b1.getProperty(&#39;x&#39;) == 6
+assert b2.getProperty(&#39;x&#39;) == 8
+assert b1 != b2
+</code></pre>
+<table>
+<thead>
+<tr>
+<th><strong>1</strong></th>
+<th>将<code>x</code>变量存储在<code>b1</code>中</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>2</strong></td>
+<td>将<code>x</code>变量存储在<code>b2</code>中</td>
+</tr>
+</tbody></table>
+<p>但是，你必须知道你仍在共享<strong>同一脚本实例</strong>。因此，如果你有两个线程处理同一个脚本，则无法使用此技术。在这种情况下，你必须确保创建两个不同的脚本实例：</p><pre><code class="language-Plaintext">def shell = new GroovyShell()def b1 = new Binding(x:3)
+def b2 = new Binding(x:4)
+def script1 = shell.parse(&#39;x = 2*x&#39;)            (1)
+def script2 = shell.parse(&#39;x = 2*x&#39;)            (2)
+assert script1 != script2
+script1.binding = b1                            (3)
+script2.binding = b2                            (4)
+def t1 = Thread.start { script1.run() }         (5)
+def t2 = Thread.start { script2.run() }         (6)
+[t1,t2]*.join()                                 (7)
+assert b1.getProperty(&#39;x&#39;) == 6
+assert b2.getProperty(&#39;x&#39;) == 8
+assert b1 != b2
+</code></pre>
+<table>
+<thead>
+<tr>
+<th><strong>1</strong></th>
+<th>为线程1创建一个实例</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>2</strong></td>
+<td>为线程2创建一个实例</td>
+</tr>
+<tr>
+<td><strong>3</strong></td>
+<td>将第一个绑定分配给脚本1</td>
+</tr>
+<tr>
+<td><strong>4</strong></td>
+<td>将第一个绑定分配给脚本2</td>
+</tr>
+<tr>
+<td><strong>5</strong></td>
+<td>在单独的线程中启动第一个脚本</td>
+</tr>
+<tr>
+<td><strong>6</strong></td>
+<td>在单独的线程中启动第二个脚本</td>
+</tr>
+<tr>
+<td><strong>7</strong></td>
+<td>等待完成</td>
+</tr>
+</tbody></table>
+<p>如果你需要像这里这样的线程安全，建议直接使用 GroovyClassLoader。</p><h4 id="123-自定义脚本类">1.2.3. 自定义脚本类</h4>
+<p>我们可以看到<code>parse</code>方法返回一个<code>groovy.lang.Script</code>的实例，但是有可能需要去使用一个自定义的类去扩展<code>Script</code>本身。它可用于为脚本提供额外的行为，如下例所示：</p><pre><code class="language-Plaintext">abstract class MyScript extends Script {
+    String name
+
+    String greet() {
+        &quot;Hello, $name!&quot;
+    }
+}
+</code></pre>
+<p>这个自定义类定义了一个叫做<code>name</code>的参数和一个叫做<code>greet</code>的方法。这个类可以通过一个自定义的配置来被用作脚本的基础类：</p><pre><code class="language-Plaintext">import org.codehaus.groovy.control.CompilerConfigurationdef config = new CompilerConfiguration()                                    (1)
+config.scriptBaseClass = &#39;MyScript&#39;                                         (2)
+def shell = new GroovyShell(this.class.classLoader, new Binding(), config)  (3)
+def script = shell.parse(&#39;greet()&#39;)                                         (4)
+assert script instanceof MyScript
+script.setName(&#39;Michel&#39;)
+assert script.run() == &#39;Hello, Michel!&#39;
+</code></pre>
+<table>
+<thead>
+<tr>
+<th><strong>1</strong></th>
+<th>创建一个<code>CompilerConfiguration</code>实例</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>2</strong></td>
+<td>指定<code>MyScript</code>作为脚本的基础类</td>
+</tr>
+<tr>
+<td><strong>3</strong></td>
+<td>然后在创建 shell 时使用编译器配置</td>
+</tr>
+<tr>
+<td><strong>4</strong></td>
+<td>该脚本现在可以访问新方法<code>greet</code></td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th><br /></th>
+<th>你不仅局限于唯一的<em>scriptBaseClass</em>配置。你能够调整任意的编译器配置，包括<a href="https://docs.groovy-lang.org/latest/html/documentation/core-domain-specific-languages.html#compilation-customizers">compilation customizers</a>。</th>
+</tr>
+</thead>
+</table>
+<h3 id="13-groovyclassloader">1.3. GroovyClassLoader</h3>
+<p>在上一节，我们已经展示了<code>GroovyShell</code>是一个执行脚本的简单工具，但是除了脚本之外，编译任何东西都变得很复杂。在内部，它使用<code>groovy.lang.GroovyClassLoader</code> ，这是运行时编译和加载类的核心。</p><p>通过使用<code>GroovyClassLoader</code>替代<code>GroovyShell</code>，你将能够加载类，而不是脚本实例：</p><pre><code class="language-Plaintext">import groovy.lang.GroovyClassLoaderdef gcl = new GroovyClassLoader()                                           (1)
+def clazz = gcl.parseClass(&#39;class Foo { void doIt() { println &quot;ok&quot; } }&#39;)    (2)
+assert clazz.name == &#39;Foo&#39;                                                  (3)
+def o = clazz.newInstance()                                                 (4)
+o.doIt()                                                                    (5)
+</code></pre>
+<table>
+<thead>
+<tr>
+<th><strong>1</strong></th>
+<th>创建一个新的<code>GroovyClassLoader</code></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>2</strong></td>
+<td><code>parseClass</code>将会返回<code>Class</code>的实例</td>
+</tr>
+<tr>
+<td><strong>3</strong></td>
+<td>你可以检查返回的类是否真的是脚本中定义的类</td>
+</tr>
+<tr>
+<td><strong>4</strong></td>
+<td>你可以创建一个新的类实例，它不是脚本</td>
+</tr>
+<tr>
+<td><strong>5</strong></td>
+<td>然后调用它的任何方法</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th><br /></th>
+<th>GroovyClassLoader保留了它创建的所有类的引用，因此很容易造成内存泄漏。特别是，如果你执行两次相同的脚本，如果它是一个字符串，那么你将获得两个不同的类！</th>
+</tr>
+</thead>
+</table>
+<pre><code class="language-Plaintext">import groovy.lang.GroovyClassLoaderdef gcl = new GroovyClassLoader()
+def clazz1 = gcl.parseClass(&#39;class Foo { }&#39;)                                (1)
+def clazz2 = gcl.parseClass(&#39;class Foo { }&#39;)                                (2)
+assert clazz1.name == &#39;Foo&#39;                                                 (3)
+assert clazz2.name == &#39;Foo&#39;
+assert clazz1 != clazz2                                                     (4)
+</code></pre>
+<table>
+<thead>
+<tr>
+<th><strong>1</strong></th>
+<th>动态创建一个名为“Foo”的类</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>2</strong></td>
+<td>使用单独的<code>parseClass</code>调用创建一个外观相同的类</td>
+</tr>
+<tr>
+<td><strong>3</strong></td>
+<td>确保两个类具有相同的名称</td>
+</tr>
+<tr>
+<td><strong>4</strong></td>
+<td>但它们实际上是不同的！</td>
+</tr>
+</tbody></table>
+<p>原因是<code>GroovyClassLoader</code>不跟踪源文本。如果你想拥有相同的实例，则源<strong>必须</strong>是一个文件，如下例所示：</p><pre><code class="language-Plaintext">def gcl = new GroovyClassLoader()
+def clazz1 = gcl.parseClass(file)                                           (1)
+def clazz2 = gcl.parseClass(new File(file.absolutePath))                    (2)
+assert clazz1.name == &#39;Foo&#39;                                                 (3)
+assert clazz2.name == &#39;Foo&#39;
+assert clazz1 == clazz2                                                     (4)
+</code></pre>
+<table>
+<thead>
+<tr>
+<th><strong>1</strong></th>
+<th>从<code>文件</code>中解析一个类</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>2</strong></td>
+<td>从不同的文件实例解析一个类，但指向同一个物理文件</td>
+</tr>
+<tr>
+<td><strong>3</strong></td>
+<td>确保我们的类具有相同的名称</td>
+</tr>
+<tr>
+<td><strong>4</strong></td>
+<td>但现在，它们是同一个实例</td>
+</tr>
+</tbody></table>
+<p>使用一个<code>File</code>作为输入，<code>GroovyClassLoader</code>是有能力<strong>缓存</strong>生成的类文件的，这样能够避免在运行时创建多个同源类。</p><h3 id="14-groovyscriptengine">1.4. GroovyScriptEngine</h3>
+<p><code>groovy.util.GroovyScriptEngine</code>类为有脚本依赖的应用程序提供了灵活的脚本重载基础。虽然<code>GroovyShell</code>专注于独立脚本，而<code>GroovyClassLoader</code>处理任何 Groovy 类的动态编译和加载，但是<code>GroovyScriptEngine</code>将在<code>GroovyClassLoader</code>之上添加一个层来处理脚本依赖关系和重新加载。</p><p>为了说明这一点，我们将创建一个脚本引擎并在无限循环中执行代码。首先，你需要创建一个目录，其中包含以下脚本：</p><p>ReloadingTest.groovy</p><pre><code class="language-Plaintext">class Greeter {
+    String sayHello() {
+        def greet = &quot;Hello, world!&quot;
+        greet
+    }
+}new Greeter()
+</code></pre>
+<p>然后你可以使用<code>GroovyScriptEngine</code>执行此代码：</p><pre><code class="language-Plaintext">def binding = new Binding()
+def engine = new GroovyScriptEngine([tmpDir.toURI().toURL()] as URL[])          (1)while (true) {
+    def greeter = engine.run(&#39;ReloadingTest.groovy&#39;, binding)                   (2)
+    println greeter.sayHello()                                                  (3)
+    Thread.sleep(1000)
+}
+</code></pre>
+<table>
+<thead>
+<tr>
+<th><strong>1</strong></th>
+<th>创建一个脚本引擎，它将在我们的源目录中查找源</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>2</strong></td>
+<td>执行脚本，它将返回一个<code>Greeter</code>的实例</td>
+</tr>
+<tr>
+<td><strong>3</strong></td>
+<td>打印问候语</td>
+</tr>
+</tbody></table>
+<p>此时，你应该会看到每秒打印一条消息：</p><p>Hello, world!Hello, world!…</p><p>在<strong>不中断</strong>脚本执行的情况下，现在将<code>ReloadingTest</code>文件的内容替换为：</p><p>ReloadingTest.groovy</p><pre><code class="language-Plaintext">class Greeter {
+    String sayHello() {
+        def greet = &quot;Hello, Groovy!&quot;
+        greet
+    }
+}new Greeter()
+</code></pre>
+<p>消息应更改为：</p><p>Hello, world!…Hello, Groovy!Hello, Groovy!…</p><p>但也可能依赖于另一个脚本。为了说明这一点，在同一目录中创建以下文件，而不中断正在执行的脚本：</p><p>Dependency.groovy</p><pre><code class="language-Plaintext">class Dependency {
+    String message = &#39;Hello, dependency 1&#39;
+}
+</code></pre>
+<p>并像这样更新<code>ReloadingTest</code>脚本：</p><p>ReloadingTest.groovy</p><pre><code class="language-Plaintext">import Dependencyclass Greeter {
+    String sayHello() {
+        def greet = new Dependency().message
+        greet
+    }
+}new Greeter()
+</code></pre>
+<p>这一次，消息应该变为：</p><p>Hello, Groovy!…Hello, dependency 1!Hello, dependency 1!…</p><p>作为最后一个测试，你可以更新<code>Dependency.groovy</code>文件，而无需触及<code>ReloadingTest</code>文件：</p><p>Dependency.groovy</p><pre><code class="language-Plaintext">class Dependency {
+    String message = &#39;Hello, dependency 2&#39;
+}
+</code></pre>
+<p>你应该观察到依赖文件已重新加载：</p><p>Hello, dependency 1!…Hello, dependency 2!Hello, dependency 2!</p><h3 id="15-compilationunit">1.5. CompilationUnit</h3>
+<p>最终，通过直接依赖<code>org.codehaus.groovy.control.CompilationUnit</code>类，可以在编译期间执行更多操作。该类负责确定编译的各个步骤，并允许你引入新步骤，甚至在各个阶段停止编译。例如，对于联合编译器，存根生成是如何完成的。</p><p>但是，不建议覆盖<code>CompilationUnit</code>，只有在没有其他标准解决方案有效的情况下才应该这样做。</p>
+            ]]>
+        </content>
+    </entry>
+    <entry>
+        <title>【翻译】Groovy编程风格指南</title>
+        <author>
+            <name>Jobs.Lee</name>
+        </author>
+        <link href="https://jobslee0.github.io/fan-yi-groovybian-cheng-feng-ge-zhi-nan.html"/>
+        <id>https://jobslee0.github.io/fan-yi-groovybian-cheng-feng-ge-zhi-nan.html</id>
+
+        <updated>2023-01-09T15:45:00+08:00</updated>
+            <summary>
+                <![CDATA[
+                    一个踏上了Groovy冒险之旅的Java开发者，会先基于烂熟于心的Java，然后再逐步的学习Groovy，一次一个特性的，最后将能够有效、习惯的使用Groovy编写代码。 这个文档旨在给在这条路上的开发者一个指导，传授一些常用的Groovy语法格式、新的操作和新的特性，譬如闭包等。这个指导文档不是完善的，仅仅作为一个进阶的快速介绍和基础指南，你可以对文档进行贡献和改进。 当你是C / C++ /&hellip;
+                ]]>
+            </summary>
+        <content type="html">
+            <![CDATA[
+                <p>一个踏上了Groovy冒险之旅的Java开发者，会先基于烂熟于心的Java，然后再逐步的学习Groovy，一次一个特性的，最后将能够有效、习惯的使用Groovy编写代码。 这个文档旨在给在这条路上的开发者一个指导，传授一些常用的Groovy语法格式、新的操作和新的特性，譬如闭包等。这个指导文档不是完善的，仅仅作为一个进阶的快速介绍和基础指南，你可以对文档进行贡献和改进。</p><h2 id="1-无分号">1. 无分号</h2>
+<p>当你是C / C++ / C# / Java背景的程序员时，已经习惯了处处使用分号。糟糕的是，Groovy支持了99%的Java语法，有时候复制Java代码到Groovy程序是十分容易的，这样就导致了分号大量的出现。可是，分号在Groovy里是可选的，你可以忽略它们，甚至于习惯移除它们。</p><h2 id="2-可选的return关键字">2. 可选的Return关键字</h2>
+<p>在Groovy中，方法体最后一行的表达式能够被返回而无需<code>return</code>关键字。尤其是在闭包的短方法中，忽略关键字使它看起来更优雅：</p><pre><code class="language-Groovy">String toString() { return &quot;a server&quot; }
+String toString() { &quot;a server&quot; }
+</code></pre>
+<p>但是当你使用变量时，它看起来不太友好，仿佛在两行里出现了两次：</p><pre><code class="language-Groovy">def props() {
+    def m1 = [a: 1, b: 2]
+    m2 = m1.findAll { k, v -&gt; v % 2 == 0 }
+    m2.c = 3
+    m2
+}
+</code></pre>
+<p>通过这个例子，要么在最后一个表达式前换行，要么使用<code>return</code>关键字来提升可读性。</p><p>我自己有时候用<code>return</code>关键字，有时候不用，这是个人喜好问题。但是举例来讲，在闭包内部，我通常会更多的忽略它。所以即使这个关键词是可选的，也并不意味着在它阻碍了代码可读性时，还要强制去掉它。</p><p>请注意，当使用<code>def</code>关键字取代指定具体的类型去定义一个方法时，你可能惊讶的发现最后一个表达式会被返回。所以通常更倾向于使用一个特别指定返回值类型譬如void或者其他类型。在上面的例子中，假设我们忘记了通过最后一个表达式去返回m2，导致最后的表达式变成了<code>m2.c = 3</code>，最后会返回<code>3</code>，而不是你所期望的值。</p><p><code>if</code> / <code>else</code> , <code>try</code> / <code>catch</code> 这些声明同样可以返回一个值，因为这里有“最后一个表达式”在这些声明中：</p><pre><code class="language-Groovy">def foo(n) {
+    if(n == 1) {
+        &quot;Roshan&quot;
+    } else {
+        &quot;Dawrani&quot;
+    }
+}assert foo(1) == &quot;Roshan&quot;
+assert foo(2) == &quot;Dawrani&quot;
+</code></pre>
+<h2 id="3-def和类型">3. Def和类型</h2>
+<p>当我们讨论<code>def</code>和类型，我经常看到开发者同时使用<code>def</code>和类型。其实<code>def</code>在这里是多余的。所以我们需要对<code>def</code>和类型进行二选一。</p><p>不要这样写：</p><pre><code class="language-Groovy">def String name = &quot;Guillaume&quot;
+</code></pre>
+<p>而是这样：</p><pre><code class="language-Groovy">String name = &quot;Guillaume&quot;
+</code></pre>
+<p>当在Groovy中使用<code>def</code>，对象实际的类型是<code>Object</code>（所以使用<code>def</code>定义的变量可以分配任何类型的对象，同时如果一个方法声明返回<code>def</code>则可以返回任何类型的对象）。</p><p>当使用无类型参数定义一个方法，你可以使用<code>def</code>关键字，但是不是必须的，我们更倾向于忽略它。以下方法可以被替代：</p><pre><code class="language-Groovy">void doSomething(def param1, def param2) { }
+</code></pre>
+<p>更建议：</p><pre><code class="language-Groovy">void doSomething(param1, param2) { }
+</code></pre>
+<p>但是就像上部分文档提到的，通常为了帮助规范化你的代码，为了帮助IDE进行代码提示，或者为了利用Groovy的静态类型检查和静态类型编译，指定方法参数类型是更好的选择。</p><p>另外一点，定义构造函数时应该避免使用<code>def</code>：</p><pre><code class="language-Groovy">class MyClass {
+    def MyClass() {}
+}
+</code></pre>
+<p>取而代之，应该移除<code>def</code>：</p><pre><code class="language-Groovy">class MyClass {
+    MyClass() {}
+}
+</code></pre>
+<h2 id="4-默认的public">4. 默认的Public</h2>
+<p>默认情况下，Groovy认为类和方法都是<code>public</code>的。所以你不需要到处重复使用<code>public</code>修饰符。只有当不是public时，你需要指定可见性修饰符。</p><p>可以取代以下代码：</p><pre><code class="language-Groovy">public class Server {
+    public String toString() { return &quot;a server&quot; }
+}
+</code></pre>
+<p>更简洁的表达：</p><pre><code class="language-Groovy">class Server {
+    String toString() { &quot;a server&quot; }
+}
+</code></pre>
+<p>你可能想知道包范围的可见性，事实上，Groovy允许忽略’public’意味着这个范围默认情况下不再被支持，这里有一个特殊的Groovy注解允许你使用这个可见性修饰符：</p><pre><code class="language-Groovy">class Server {
+    @PackageScope Cluster cluster
+}
+</code></pre>
+<h2 id="5-可忽略的括号">5. 可忽略的括号</h2>
+<p>Groovy允许你忽略顶级表达式中的括号，譬如<code>println</code>指令：</p><pre><code class="language-Groovy">println &quot;Hello&quot;
+method a, b
+</code></pre>
+<p>对照：</p><pre><code class="language-Groovy">println(&quot;Hello&quot;)
+method(a, b)
+</code></pre>
+<p>当一个闭包是一个方法调用的最后一个参数时，就像使用Groovy的<code>each{}</code>迭代器一样，你可以把闭包放在闭合的括号内，甚至也可以忽略括号：</p><pre><code class="language-Groovy">list.each( { println it } )
+list.each(){ println it }
+list.each  { println it }
+</code></pre>
+<p>第三种方式是一直推崇的，更自然，一对空括号就像是语句中无用的废话。</p><p>在某些情况下括号是必须的，例如在进行嵌套方法调用或调用不带参数的方法时。</p><pre><code class="language-Groovy">def foo(n) { n }
+def bar() { 1 }
+
+println foo 1 // won&#39;t work
+def m = bar   // won&#39;t work
+</code></pre>
+<h2 id="6-classes是一等公民">6. Classes是一等公民</h2>
+<p>在Groovy中<code>.class</code>后缀不是必须的，有点像Java的<code>instanceof</code>。</p><p>举个例子：</p><pre><code class="language-Groovy">connection.doPost(BASE_URI + &quot;/modify.hqu&quot;, params, ResourcesResponse.class)
+</code></pre>
+<p>使用GStrings的例子，并使用一等公民的方式替代上面的写法：</p><pre><code class="language-Groovy">connection.doPost(&quot;${BASE_URI}/modify.hqu&quot;, params, ResourcesResponse)
+</code></pre>
+<h2 id="7-getters和setters方法">7. Getters和Setters方法</h2>
+<p>在Groovy中，getter和setter形成了我们所说的“属性”，并提供访问和设置此类属性的快捷方法。因此替代Java的调用方式，可以使用类似的字段获取方法：</p><pre><code class="language-Groovy">resourceGroup.getResourcePrototype().getName() == SERVER_TYPE_NAME
+resourceGroup.resourcePrototype.name == SERVER_TYPE_NAME
+
+resourcePrototype.setName(&quot;something&quot;)
+resourcePrototype.name = &quot;something&quot;
+</code></pre>
+<p>当你在Groovy中写你的beans（经常被叫做POGO (Plain Old Groovy Object)）时，你不必再自行创建字段的getter/setter的方法，这些将由Groovy编译器来帮你做。</p><p>可以替代这些：</p><pre><code class="language-Groovy">class Person {
+    private String name
+    String getName() { return name }
+    void setName(String name) { this.name = name }
+}
+</code></pre>
+<p>简化为：</p><pre><code class="language-Groovy">class Person {
+    String name
+}
+</code></pre>
+<p>正如你所看到的，一个没有可见修饰符的字段实际上会由Groovy编译器去生成一个私有的字段以及getter/setter方法。</p><p>在Java中使用此类POGO时，getter和setter方法实际存在，可以照常使用。</p><p>尽管编译器创建了通常的getter/setter逻辑，但如果你希望在这些getter/setter中做任何额外或不同的事情，你仍然可以自由地提供它们，编译器将使用你的逻辑，而不是默认生成的逻辑。</p><h2 id="8-使用命名参数和默认构造函数初始化-bean">8. 使用命名参数和默认构造函数初始化 bean</h2>
+<p>举一个bean的例子：</p><pre><code class="language-Groovy">class Server {
+    String name
+    Cluster cluster
+}
+</code></pre>
+<p>而不是在后续语句中设置每个 setter，如下所示：</p><pre><code class="language-Groovy">def server = new Server()
+server.name = &quot;Obelix&quot;
+server.cluster = aCluster
+</code></pre>
+<p>你可以将命名参数与默认构造函数一起使用（首先调用构造函数，然后按照在映射中指定的顺序调用设置）：</p><pre><code class="language-Groovy">def server = new Server(name: &quot;Obelix&quot;, cluster: aCluster)
+</code></pre>
+<h2 id="9-使用-with-和-tap-对同一个-bean-进行重复操作">9. 使用 with() 和 tap() 对同一个 bean 进行重复操作</h2>
+<p>当你创建一个新的实例的时候，使用名称-参数的默认构造方法是有趣的，但是如果你在更新一个实例的时候，你是否不得不重复’server’前缀？不，感谢Groovy为所有类型对象提供的<code>with()</code>和<code>tap()</code>方法：</p><pre><code class="language-Groovy">server.name = application.name
+server.status = status
+server.sessionCount = 3
+server.start()
+server.stop()
+</code></pre>
+<p>对比：</p><pre><code class="language-Groovy">server.with {
+    name = application.name
+    status = status
+    sessionCount = 3
+    start()
+    stop()
+}
+</code></pre>
+<p>与 Groovy 中的任何闭包一样，最后一条语句被视为返回值。在上面的例子中，返回的结果是<code>stop()</code>。想要使用这种方式构建只返回传入的对象，可以使用<code>tap()</code>方法：</p><pre><code class="language-Groovy">def person = new Person().with {
+    name = &quot;Ada Lovelace&quot;
+    it // Note the explicit mention of it as the return value
+}
+</code></pre>
+<p>对比：</p><pre><code class="language-Groovy">def person = new Person().tap {
+    name = &quot;Ada Lovelace&quot;
+}
+</code></pre>
+<p>注意：你也可以使用 <code>with(true)</code> 代替 <code>tap()</code> 和 <code>with(false)</code> 代替 <code>with()</code> 。</p><h2 id="10-equals和">10. Equals和<code>==</code></h2>
+<p>Java的<code>==</code>实际上等同于Groovy的<code>is()</code>方法，Groovy的<code>==</code>是更智能的<code>equals()</code>！</p><p>在比较对象引用的过程中，需要使用<code>a.is(b)</code>去替代<code>==</code>。</p><p>但是比起使用<code>equals()</code>比较，你应该更喜欢Groovy的<code>==</code>，并且它对<code>NullPointerException</code>进行了规避处理，与为<code>null</code>变量在左边和在右边无关。</p><p>为了替代如下：</p><pre><code class="language-Groovy">status != null &amp;&amp; status.equals(ControlConstants.STATUS_COMPLETED)
+</code></pre>
+<p>可以这么做：</p><pre><code class="language-Groovy">status == ControlConstants.STATUS_COMPLETED
+</code></pre>
+<h2 id="11-gstrings（插值，多行）">11. GStrings（插值，多行）</h2>
+<p>我们在Java中经常使用字符串和变量连接，导致有许多开闭的双引号、加号、以及<code>\n</code>换行符。通过插值字符串（叫做GStrings），这样的字符串看起来更友好，输入起来也不那么痛苦：</p><pre><code class="language-Groovy">throw new Exception(&quot;Unable to convert resource: &quot; + resource)
+</code></pre>
+<p>对比：</p><pre><code class="language-Groovy">throw new Exception(&quot;Unable to convert resource: ${resource}&quot;)
+</code></pre>
+<p>在大括号里面，你可以放入任何类型的表达式，而不仅仅是变量。譬如，简单的变量、<code>variable.property</code>，你甚至可以去掉大括号：</p><pre><code class="language-Groovy">throw new Exception(&quot;Unable to convert resource: $resource&quot;)
+</code></pre>
+<p>你甚至可以通过闭包<code>${-&gt; resource }</code>来延迟执行这些表达式。当GString被强制转换为String时，它将执行闭包然后调用<code>toString()</code>方法来表示返回值。</p><p>举例：</p><pre><code class="language-Groovy">int i = 3def s1 = &quot;i&#39;s value is: ${i}&quot;
+def s2 = &quot;i&#39;s value is: ${-&gt; i}&quot;
+
+i++assert s1 == &quot;i&#39;s value is: 3&quot; // eagerly evaluated, takes the value on creation
+assert s2 == &quot;i&#39;s value is: 4&quot; // lazily evaluated, takes the new value into account
+</code></pre>
+<p>当字符串及其连接的表达式在Java中很长时：</p><pre><code class="language-Groovy">throw new PluginException(&quot;Failed to execute command list-applications:&quot; +
+    &quot; The group with name &quot; +
+    parameterMap.groupname[0] +
+    &quot; is not compatible group of type &quot; +
+    SERVER_TYPE_NAME)
+</code></pre>
+<p>您可以使用<code>\</code>连续字符（这不是多行字符串）：</p><pre><code class="language-Groovy">throw new PluginException(&quot;Failed to execute command list-applications: \
+The group with name ${parameterMap.groupname[0]} \
+is not compatible group of type ${SERVER_TYPE_NAME}&quot;)
+</code></pre>
+<p>或者使用带三引号的多行字符串：</p><pre><code class="language-Groovy">throw new PluginException(&quot;&quot;&quot;Failed to execute command list-applications:
+    The group with name ${parameterMap.groupname[0]}
+    is not compatible group of type ${SERVER_TYPE_NAME)}&quot;&quot;&quot;)
+</code></pre>
+<p>您还可以通过在该字符串上调用 <code>.stripIndent()</code> 来去除出现在多行字符串左侧的缩进。</p><p>还要注意单引号和双引号在Groovy中的不同：单引号一直被拿来创建Java不包含插值的字符串，然而当存在插值时，双引号将会创建Java字符串或者GStrings。</p><p>对于多行字符串，你可以使用三重引号：即 GStrings 的三重双引号和纯字符串的三重单引号。</p><p>如果你需要写正则表达式，你可以使用“斜线”字符串表示法：</p><pre><code class="language-Groovy">assert &quot;foooo/baaaaar&quot; ==~ /fo+\/ba+r/
+</code></pre>
+<p>“斜线”表示法的优点是您不需要双转义反斜杠，使使用正则表达式更简单。</p><p>最后，当你需要字符串常量的时候更建议使用单引号，当你需要依赖字符串插值的时候要使用双引号。</p><h2 id="12-数据结构的原生语法">12. 数据结构的原生语法</h2>
+<p>Groovy为lists、maps、regex或ranges提供了原生的数据结构语法。确保在你的Groovy程序中去使用它。</p><p>这些原生数据结构的例子：</p><pre><code class="language-Groovy">def list = [1, 4, 6, 9]// by default, keys are Strings, no need to quote them
+// you can wrap keys with () like [(variableStateAcronym): stateName] to insert a variable or object as a key.
+def map = [CA: &#39;California&#39;, MI: &#39;Michigan&#39;]// ranges can be inclusive and exclusive
+def range = 10..20 // inclusive
+assert range.size() == 11
+// use brackets if you need to call a method on a range definition
+assert (10..&lt;20).size() == 10 // exclusivedef pattern = ~/fo*/// equivalent to add()
+list &lt;&lt; 5// call contains()
+assert 4 in list
+assert 5 in list
+assert 15 in range
+
+// subscript notation
+assert list[1] == 4// add a new key value pair
+map &lt;&lt; [WA: &#39;Washington&#39;]
+// subscript notation
+assert map[&#39;CA&#39;] == &#39;California&#39;
+// property notation
+assert map.WA == &#39;Washington&#39;// matches() strings against patterns
+assert &#39;foo&#39; ==~ pattern
+</code></pre>
+<h2 id="13-groovy开发工具包">13. Groovy开发工具包</h2>
+<p>继续谈论这些数据结构，当你去遍历集合时，Groovy提供了很多的附加方法来装饰Java代码的数据结构，譬如<code>each{}</code> , <code>find{}</code> , <code>findAll{}</code> , <code>every{}</code> , <code>collect{}</code> , <code>inject{}</code>。这些方法为编程语言提供了新的功能特性，能够更简单的来实现复杂的算法。由于语言的动态特性，许多新方法通过修饰应用于各种类型。你可以发现很多非常有用的方法在String, Files, Streams, Collections等数据结构中：</p><p><a href="http://groovy-lang.org/gdk.html">http://groovy-lang.org/gdk.html</a></p><h2 id="14-强大的switch">14. 强大的switch</h2>
+<p>Groovy的<code>switch</code>比起直接只受原语和同化的C-ish语言更加强大。Groovy的<code>switch</code>接收几乎任何类型的参数。</p><pre><code class="language-Groovy">def x = 1.23
+def result = &quot;&quot;
+switch (x) {
+    case &quot;foo&quot;: result = &quot;found foo&quot;
+    // lets fall through
+    case &quot;bar&quot;: result += &quot;bar&quot;
+    case [4, 5, 6, &#39;inList&#39;]:
+        result = &quot;list&quot;
+        break
+    case 12..30:
+        result = &quot;range&quot;
+        break
+    case Integer:
+        result = &quot;integer&quot;
+        break
+    case Number:
+        result = &quot;number&quot;
+        break
+    case { it &gt; 3 }:
+        result = &quot;number &gt; 3&quot;
+        break
+    default: result = &quot;default&quot;
+}
+assert result == &quot;number&quot;
+</code></pre>
+<p>更进一步来讲，带有 <code>isCase()</code> 方法的类型也可以决定一个值是否与一个case相对应。</p><h2 id="15-import别名">15. Import别名</h2>
+<p>在Java中，当你使用两个不同包但同名的类时，譬如<code>java.util.List</code>和<code>java.awt.List</code>，你只能导入一个类，然后不得不通过使用完全限定名来使用另外一个类。</p><p>有时候在代码中，多个长类名的调用可能显得代码冗长且降低了代码的清晰度。</p><p>为了改善这些场景，Groovy提供了导入别名的特性：</p>
+            ]]>
+        </content>
+    </entry>
+    <entry>
+        <title>【翻译】Groovy闭包</title>
+        <author>
+            <name>Jobs.Lee</name>
+        </author>
+        <link href="https://jobslee0.github.io/fan-yi-groovybi-bao.html"/>
+        <id>https://jobslee0.github.io/fan-yi-groovybi-bao.html</id>
+
+        <updated>2023-01-09T15:45:00+08:00</updated>
+            <summary>
+                <![CDATA[
+                    闭包 本章节主要讲解Groovy的闭包。Groovy中的闭包是一个开放、匿名、可以携带参数的代码块，同时可以返回一个指定变量的值。一个闭包可以引用在它周围声明的变量。与闭包的正式定义相反的，Closure在Groovy语言中还可以包含在其周围范围之外定义的自由变量。虽然打破了闭包的正式概念，但它提供了本章中描述的各种优点。 一个闭包的定义遵循以下语法： { [closureParameters -&gt;&hellip;
+                ]]>
+            </summary>
+        <content type="html">
+            <![CDATA[
+                <h1 id="闭包">闭包</h1>
+<p>  本章节主要讲解Groovy的闭包。Groovy中的闭包是一个开放、匿名、可以携带参数的代码块，同时可以返回一个指定变量的值。一个闭包可以引用在它周围声明的变量。与闭包的正式定义相反的，<code>Closure</code>在Groovy语言中还可以包含在其周围范围之外定义的自由变量。虽然打破了闭包的正式概念，但它提供了本章中描述的各种优点。</p><h2 id="1-语法">1. 语法</h2>
+<h3 id="11-定义一个闭包">1.1. 定义一个闭包</h3>
+<p>一个闭包的定义遵循以下语法：</p><pre><code class="language-Groovy">{ [closureParameters -&gt; ] statements }
+</code></pre>
+<p><code>[closureParameters-&gt;]</code>是一个可选的逗号分隔的参数列表，语句是0个或者多个Groovy语句。这些参数看起来像方法的参数列表，这些参数类型可有可无。</p><p>当一个参数列表被指定，<code>-&gt;</code>符号是必须的，它能够在闭包体中提供分割参数的功能。<em>语句</em>部分由0个、1个或者许多个Groovy语句组成。</p><p>一些有效的闭包定义示例：</p><pre><code class="language-Groovy">{ item++ }                                          (1)
+{ -&gt; item++ }                                       (2)
+{ println it }                                      (3)
+{ it -&gt; println it }                                (4)
+{ name -&gt; println name }                            (5)
+{ String x, int y -&gt;                                (6)
+    println &quot;hey ${x} the value is ${y}&quot;
+}{ reader -&gt;                                         (7)
+    def line = reader.readLine()
+    line.trim()
+}
+</code></pre>
+<table>
+<thead>
+<tr>
+<th><strong>1</strong></th>
+<th>引用名为<code>item</code>的变量的闭包</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>2</strong></td>
+<td>可以通过添加箭头 (<code>-&gt;</code>) 将闭包参数与代码显式分开</td>
+</tr>
+<tr>
+<td><strong>3</strong></td>
+<td>使用隐式参数 (<code>it</code>) 的闭包</td>
+</tr>
+<tr>
+<td><strong>4</strong></td>
+<td><code>it</code>是显式参数的替代版本</td>
+</tr>
+<tr>
+<td><strong>5</strong></td>
+<td>在这种情况下，通常最好为参数使用显式名称</td>
+</tr>
+<tr>
+<td><strong>6</strong></td>
+<td>一个接受两个类型参数的闭包</td>
+</tr>
+<tr>
+<td><strong>7</strong></td>
+<td>一个闭包可以包含多个语句</td>
+</tr>
+</tbody></table>
+<h3 id="12-闭包是一个对象">1.2. 闭包是一个对象</h3>
+<p>闭包是<code>groovy.lang.Closure</code>类的一个实例，使它可以像任何其他变量一样分配给变量或字段，尽管它是一个代码块：</p><pre><code class="language-Groovy">def listener = { e -&gt; println &quot;Clicked on $e.source&quot; }      (1)
+assert listener instanceof Closure
+Closure callback = { println &#39;Done!&#39; }                      (2)
+Closure&lt;Boolean&gt; isTextFile = {
+    File it -&gt; it.name.endsWith(&#39;.txt&#39;)                     (3)
+}
+</code></pre>
+<table>
+<thead>
+<tr>
+<th><strong>1</strong></th>
+<th>你可以将闭包分配给变量，它是<code>groovy.lang.Closure</code>的一个实例</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>2</strong></td>
+<td>如果不使用<code>def</code>或<code>var</code>，请使用<code>groovy.lang.Closure</code>作为类型</td>
+</tr>
+<tr>
+<td><strong>3</strong></td>
+<td>或者，你可以使用<code>groovy.lang.Closure</code>的泛型类型指定闭包的返回类型</td>
+</tr>
+</tbody></table>
+<h3 id="13-调用一个闭包">1.3. 调用一个闭包</h3>
+<p>一个闭包，作为一个匿名的代码块，可以像其他任何方法一样被调用。如果你定义一个不带任何参数的闭包，像这样：</p><pre><code class="language-Groovy">def code = { 123 }
+</code></pre>
+<p>闭包中的代码只有当你<em>调用</em>的时候才会执行，这可以使用变量来实现，就像它是一个常规方法一样：</p><pre><code class="language-Groovy">assert code() == 123
+</code></pre>
+<p>或者，你可以显式地使用<code>call</code>方法：</p><pre><code class="language-Groovy">assert code.call() == 123
+</code></pre>
+<p>如果闭包接受参数，原则是一样的：</p><pre><code class="language-Groovy">def isOdd = { int i -&gt; i%2 != 0 }                           (1)
+assert isOdd(3) == true                                     (2)
+assert isOdd.call(2) == false                               (3)
+def isEven = { it%2 == 0 }                                  (4)
+assert isEven(3) == false                                   (5)
+assert isEven.call(2) == true                               (6)
+</code></pre>
+<table>
+<thead>
+<tr>
+<th><strong>1</strong></th>
+<th>定义一个接受<code>int</code>作为参数的闭包</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>2</strong></td>
+<td>可以直接调用</td>
+</tr>
+<tr>
+<td><strong>3</strong></td>
+<td>或者使用<code>call</code>方法</td>
+</tr>
+<tr>
+<td><strong>4</strong></td>
+<td>带有隐式参数（<code>it</code>）的闭包也是如此</td>
+</tr>
+<tr>
+<td><strong>5</strong></td>
+<td>可以使用 (<code>arg</code>) 直接调用</td>
+</tr>
+<tr>
+<td><strong>6</strong></td>
+<td>或使用<code>call</code></td>
+</tr>
+</tbody></table>
+<p>与方法不同，闭包在调用时<strong>总是</strong>返回一个值。下一节讨论如何声明闭包参数，何时使用它们以及什么是隐式“it”参数。</p><h2 id="2-参数">2. 参数</h2>
+<h3 id="21-正常参数">2.1. 正常参数</h3>
+<p>闭包的参数遵循与常规方法的参数相同的原则：</p><ul>
+<li>可选类型</li>
+<li>一个名字</li>
+<li>可选的默认值</li>
+</ul>
+<p>参数用逗号分隔：</p><pre><code class="language-Groovy">def closureWithOneArg = { str -&gt; str.toUpperCase() }
+assert closureWithOneArg(&#39;groovy&#39;) == &#39;GROOVY&#39;def closureWithOneArgAndExplicitType = { String str -&gt; str.toUpperCase() }
+assert closureWithOneArgAndExplicitType(&#39;groovy&#39;) == &#39;GROOVY&#39;def closureWithTwoArgs = { a,b -&gt; a+b }
+assert closureWithTwoArgs(1,2) == 3def closureWithTwoArgsAndExplicitTypes = { int a, int b -&gt; a+b }
+assert closureWithTwoArgsAndExplicitTypes(1,2) == 3def closureWithTwoArgsAndOptionalTypes = { a, int b -&gt; a+b }
+assert closureWithTwoArgsAndOptionalTypes(1,2) == 3def closureWithTwoArgAndDefaultValue = { int a, int b=2 -&gt; a+b }
+assert closureWithTwoArgAndDefaultValue(1) == 3
+</code></pre>
+<h3 id="22-隐式参数">2.2. 隐式参数</h3>
+<p>当一个闭包没有显示的声明参数列表（使用<code>-&gt;</code>），一个闭包<strong>总是</strong>定义了一个隐式的参数，叫做<code>it</code>。这意味着以下代码：</p><pre><code class="language-Groovy">def greeting = { &quot;Hello, $it!&quot; }
+assert greeting(&#39;Patrick&#39;) == &#39;Hello, Patrick!&#39;
+</code></pre>
+<p>严格等同于这个：</p><pre><code class="language-Groovy">def greeting = { it -&gt; &quot;Hello, $it!&quot; }
+assert greeting(&#39;Patrick&#39;) == &#39;Hello, Patrick!&#39;
+</code></pre>
+<p>如果你想声明一个不接受参数并且必须限制为不带参数调用的闭包，那么你<strong>必须</strong>用一个显式的空参数列表声明它：</p><pre><code class="language-Groovy">def magicNumber = { -&gt; 42 }// this call will fail because the closure doesn&#39;t accept any argument
+magicNumber(11)
+</code></pre>
+<h3 id="23-varargs">2.3. Varargs</h3>
+<p>闭包可以像任何其他方法一样声明变量参数。如果最后一个参数是可变长度（或数组），则<em>Vargs</em>方法是可以接受可变数量参数的方法，如下例所示：</p><pre><code class="language-Groovy">def concat1 = { String... args -&gt; args.join(&#39;&#39;) }           (1)
+assert concat1(&#39;abc&#39;,&#39;def&#39;) == &#39;abcdef&#39;                     (2)
+def concat2 = { String[] args -&gt; args.join(&#39;&#39;) }            (3)
+assert concat2(&#39;abc&#39;, &#39;def&#39;) == &#39;abcdef&#39;def multiConcat = { int n, String... args -&gt;                (4)
+    args.join(&#39;&#39;)*n
+}
+assert multiConcat(2, &#39;abc&#39;,&#39;def&#39;) == &#39;abcdefabcdef&#39;
+</code></pre>
+<table>
+<thead>
+<tr>
+<th><strong>1</strong></th>
+<th>接受可变数量的字符串作为第一个参数的闭包</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>2</strong></td>
+<td>可以使用任意数量的参数调用它，而<strong>无需</strong>将它们显式包装到数组中</td>
+</tr>
+<tr>
+<td><strong>3</strong></td>
+<td>如果将<em>args</em>参数声明为数组，则可以直接使用相同的行为</td>
+</tr>
+<tr>
+<td><strong>4</strong></td>
+<td>只要<strong>最后</strong>一个参数是数组或显式 vargs 类型</td>
+</tr>
+</tbody></table>
+<h2 id="3-委托策略">3. 委托策略</h2>
+<h3 id="31-groovy闭包-vs-lambda表达式">3.1. Groovy闭包 vs lambda表达式</h3>
+<p>Groovy将闭包定义为Closure类的实例。这使得它跟<a href="https://docs.oracle.com/javase/tutorial/java/javaOO/lambdaexpressions.html">lambda expressions in Java 8</a>非常的不一样。委托在Groovy闭包中是一个跟lambda不相同的重要概念。<em>更改委托</em>或<em>更改闭包的委托策略</em>的能力使得在 Groovy 中设计漂亮的领域特定语言 (DSL) 成为可能。</p><h3 id="32-owner-delegate和this">3.2. Owner, delegate和this</h3>
+<p>为了理解delegate的概念，我们首先必须解释下闭包中<code>this</code>的含义。一个闭包实际上定义了3个不同的东西：</p><ul>
+<li><code>this</code>对应于定义闭包的<em>封闭类</em></li>
+<li><code>owner</code>对应于定义闭包的<em>封闭对象</em>，可以是类也可以是闭包</li>
+<li><code>delegate</code>对应于第三方对象，只要未定义消息的接收者，就会解析方法调用或属性</li>
+</ul>
+<h4 id="321-this的含义">3.2.1. this的含义</h4>
+<p>在闭包中，调用<code>getThisObject</code>将会返回闭包定义的封闭类。它等效于使用显式<code>this</code>：</p><pre><code class="language-Groovy">class Enclosing {
+    void run() {
+        def whatIsThisObject = { getThisObject() }          (1)
+        assert whatIsThisObject() == this                   (2)
+        def whatIsThis = { this }                           (3)
+        assert whatIsThis() == this                         (4)
+    }
+}
+class EnclosedInInnerClass {
+    class Inner {
+        Closure cl = { this }                               (5)
+    }
+    void run() {
+        def inner = new Inner()
+        assert inner.cl() == inner                          (6)
+    }
+}
+class NestedClosures {
+    void run() {
+        def nestedClosures = {
+            def cl = { this }                               (7)
+            cl()
+        }
+        assert nestedClosures() == this                     (8)
+    }
+}
+</code></pre>
+<table>
+<thead>
+<tr>
+<th><strong>1</strong></th>
+<th>在<code>Enclosure</code>类中定义了一个闭包，并返回<code>getThisObject</code></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>2</strong></td>
+<td>调用闭包将返回定义闭包的<code>Enclosure</code>实例</td>
+</tr>
+<tr>
+<td><strong>3</strong></td>
+<td>通常，你只想使用<code>this</code>表示法的快捷方式</td>
+</tr>
+<tr>
+<td><strong>4</strong></td>
+<td>它返回<strong>完全</strong>相同的对象</td>
+</tr>
+<tr>
+<td><strong>5</strong></td>
+<td>如果闭包是在内部类中定义的</td>
+</tr>
+<tr>
+<td><strong>6</strong></td>
+<td>闭包中的<code>this</code>​<strong>将</strong>返回内部类，而不是顶级类</td>
+</tr>
+<tr>
+<td><strong>7</strong></td>
+<td>在嵌套闭包的情况下，就像这里<code>cl</code>被定义在<code>NestedClosures</code>的范围内</td>
+</tr>
+<tr>
+<td><strong>8</strong></td>
+<td>那么<code>this</code>对应于最近的外部类，而不是封闭的闭包！</td>
+</tr>
+</tbody></table>
+<p>当然可以这样调用闭包类中的方法：</p><pre><code class="language-Groovy">class Person {
+    String name
+    int age
+    String toString() { &quot;$name is $age years old&quot; }
+
+    String dump() {
+        def cl = {
+            String msg = this.toString()               (1)
+            println msg
+            msg
+        }
+        cl()
+    }
+}
+def p = new Person(name:&#39;Janice&#39;, age:74)
+assert p.dump() == &#39;Janice is 74 years old&#39;
+</code></pre>
+<table>
+<thead>
+<tr>
+<th><strong>1</strong></th>
+<th>闭包在<code>this</code>上调用<code>toString</code>，这实际上会在封闭对象上调用<code>toString</code>方法，即<code>Person</code>实例</th>
+</tr>
+</thead>
+</table>
+<h4 id="322-闭包的所有者owner">3.2.2. 闭包的所有者Owner</h4>
+<p>闭包的owner与闭包中this的定义非常相似，但有细微差别：它将返回直接封闭的对象，无论是闭包还是类：</p><pre><code class="language-Groovy">class Enclosing {
+    void run() {
+        def whatIsOwnerMethod = { getOwner() }               (1)
+        assert whatIsOwnerMethod() == this                   (2)
+        def whatIsOwner = { owner }                          (3)
+        assert whatIsOwner() == this                         (4)
+    }
+}
+class EnclosedInInnerClass {
+    class Inner {
+        Closure cl = { owner }                               (5)
+    }
+    void run() {
+        def inner = new Inner()
+        assert inner.cl() == inner                           (6)
+    }
+}
+class NestedClosures {
+    void run() {
+        def nestedClosures = {
+            def cl = { owner }                               (7)
+            cl()
+        }
+        assert nestedClosures() == nestedClosures            (8)
+    }
+}
+</code></pre>
+<table>
+<thead>
+<tr>
+<th><strong>1</strong></th>
+<th>在<code>Enclosure</code>类中定义了一个闭包，并返回<code>getOwner</code></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>2</strong></td>
+<td>调用闭包将返回定义闭包的<code>Enclosure</code>实例</td>
+</tr>
+<tr>
+<td><strong>3</strong></td>
+<td>通常，你只想使用快捷方式<code>owener</code>表示法</td>
+</tr>
+<tr>
+<td><strong>4</strong></td>
+<td>它返回<strong>完全</strong>相同的对象</td>
+</tr>
+<tr>
+<td><strong>5</strong></td>
+<td>如果闭包是在内部类中定义的</td>
+</tr>
+<tr>
+<td><strong>6</strong></td>
+<td>闭包中的<code>owener</code>​<strong>将</strong>返回内部类，而不是顶级类</td>
+</tr>
+<tr>
+<td><strong>7</strong></td>
+<td>但是在<code>nestedClosures</code>的情况下，就像这里<code>cl</code>被定义在嵌套闭包的范围内</td>
+</tr>
+<tr>
+<td><strong>8</strong></td>
+<td>那么<code>owner</code>对应于封闭的闭包，因此与<code>this</code>不同的对象！</td>
+</tr>
+</tbody></table>
+<h4 id="323-闭包的委托delegate">3.2.3. 闭包的委托Delegate</h4>
+<p>可以使用委托属性或调用<code>getDelegate</code>方法来访问闭包的委托。它是在 Groovy 中构建特定领域语言的强大概念。虽然this和owner指的是闭包的词法范围，但委托是闭包将使用的用户定义对象。默认情况下，委托设置为<code>owener</code>：</p><pre><code class="language-Groovy">class Enclosing {
+    void run() {
+        def cl = { getDelegate() }                          (1)
+        def cl2 = { delegate }                              (2)
+        assert cl() == cl2()                                (3)
+        assert cl() == this                                 (4)
+        def enclosed = {
+            { -&gt; delegate }.call()                          (5)
+        }
+        assert enclosed() == enclosed                       (6)
+    }
+}
+</code></pre>
+<table>
+<thead>
+<tr>
+<th><strong>1</strong></th>
+<th>你可以通过调用<code>getDelegate</code>方法获取闭包的委托</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>2</strong></td>
+<td>或使用<code>delegate</code>属性</td>
+</tr>
+<tr>
+<td><strong>3</strong></td>
+<td>两者都返回相同的对象</td>
+</tr>
+<tr>
+<td><strong>4</strong></td>
+<td>这是封闭类或闭包</td>
+</tr>
+<tr>
+<td><strong>5</strong></td>
+<td>特别是在嵌套闭包的情况下</td>
+</tr>
+<tr>
+<td><strong>6</strong></td>
+<td><code>delegate</code>将对应于<code>owner</code></td>
+</tr>
+</tbody></table>
+<p>闭包的委托可以更改为<strong>任何对象</strong>。让我们通过创建两个类来说明这一点，它们不是彼此的子类，但都定义了一个名为<code>name</code>的属性：</p><pre><code class="language-Groovy">class Person {
+    String name
+}
+class Thing {
+    String name
+}def p = new Person(name: &#39;Norman&#39;)
+def t = new Thing(name: &#39;Teapot&#39;)
+</code></pre>
+<p>然后让我们定义一个闭包来获取委托上的<code>name</code>属性：</p><pre><code class="language-Groovy">def upperCasedName = { delegate.name.toUpperCase() }
+</code></pre>
+<p>然后通过更改闭包的委托，可以看到目标对象会发生变化：</p><pre><code class="language-Groovy">upperCasedName.delegate = p
+assert upperCasedName() == &#39;NORMAN&#39;
+upperCasedName.delegate = t
+assert upperCasedName() == &#39;TEAPOT&#39;
+</code></pre>
+<p>此时，行为与在闭包的词法范围中定义<code>target</code>变量没有什么不同：</p><pre><code class="language-Groovy">def target = p
+def upperCasedNameUsingVar = { target.name.toUpperCase() }
+assert upperCasedNameUsingVar() == &#39;NORMAN&#39;
+</code></pre>
+<p>但是，有主要区别：</p><ul>
+<li>在最后一个示例中，<em>target</em>是从闭包内引用的局部变量</li>
+<li>委托可以透明地使用，也就是说，无需在方法调用前加上<code>delegate</code>。如下一段所述。</li>
+</ul>
+<h4 id="324-委托策略">3.2.4. 委托策略</h4>
+<p>每当在闭包中访问一个属性而不显式设置接收器对象时，就会涉及到委托策略：</p><pre><code class="language-Groovy">class Person {
+    String name
+}
+def p = new Person(name:&#39;Igor&#39;)
+def cl = { name.toUpperCase() }                 (1)
+cl.delegate = p                                 (2)
+assert cl() == &#39;IGOR&#39;                           (3)
+</code></pre>
+<table>
+<thead>
+<tr>
+<th><strong>1</strong></th>
+<th><code>name</code>没有引用闭包词法范围内的变量</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>2</strong></td>
+<td>我们可以将闭包的委托更改为<code>Person</code>的实例</td>
+</tr>
+<tr>
+<td><strong>3</strong></td>
+<td>并且方法调用会成功</td>
+</tr>
+</tbody></table>
+<p>此代码有效的原因是<code>name</code>属性将在<code>delegate</code>对象上透明地解析！这是解决闭包内的属性或方法调用的一种非常强大的方法。无需设置显式<code>delegate</code>。接收者：将进行调用，因为闭包的默认委托策略使其如此。闭包实际上定义了多种解决策略，你可以选择：</p><ul>
+<li><code>Closure.OWNER_FIRST</code>是<strong>默认策略</strong>。如果<strong>owner</strong>上存在属性/方法，那么它将在owner上调用。如果不是，则使用<strong>delegate</strong>。</li>
+<li><code>Closure.DELEGATE_FIRST</code>反转逻辑：先使用<strong>delegate</strong>，然后使用<strong>owner</strong></li>
+<li><code>Closure.OWNER_ONLY</code>只会解析所有者的属性/方法查找：委托将被忽略。</li>
+<li><code>Closure.DELEGATE_ONLY</code>只会解析委托上的属性/方法查找：所有者将被忽略。</li>
+<li><code>Closure.TO_SELF</code>可供需要高级元编程技术并希望实现自定义解析策略的开发人员使用：解析不会针对所有者或委托，而只会针对闭包类本身。如果你实现自己的<code>Closure</code>子类，则使用它才有意义。</li>
+</ul>
+<p>让我们用这段代码来说明默认的“所有者优先”策略：</p><pre><code class="language-Groovy">class Person {
+    String name
+    def pretty = { &quot;My name is $name&quot; }             (1)
+    String toString() {
+        pretty()
+    }
+}
+class Thing {
+    String name                                     (2)
+}def p = new Person(name: &#39;Sarah&#39;)
+def t = new Thing(name: &#39;Teapot&#39;)assert p.toString() == &#39;My name is Sarah&#39;           (3)
+p.pretty.delegate = t                               (4)
+assert p.toString() == &#39;My name is Sarah&#39;           (5)
+</code></pre>
+<table>
+<thead>
+<tr>
+<th><strong>1</strong></th>
+<th>为了说明，我们定义了一个引用“name”的闭包成员</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>2</strong></td>
+<td><code>Person</code>和<code>Thing</code>类都定义了一个<code>name</code>属性</td>
+</tr>
+<tr>
+<td><strong>3</strong></td>
+<td>使用默认策略，首先在所有者上解析<code>name</code>属性</td>
+</tr>
+<tr>
+<td><strong>4</strong></td>
+<td>因此，如果我们将<code>delegate</code>更改为<code>t</code>，它是<code>Thing</code>的一个实例</td>
+</tr>
+<tr>
+<td><strong>5</strong></td>
+<td>结果没有变化：<code>name</code>首先在闭包的<code>owner</code>上解析</td>
+</tr>
+</tbody></table>
+<p>但是，可以更改闭包的解析策略：</p><pre><code class="language-Groovy">p.pretty.resolveStrategy = Closure.DELEGATE_FIRST
+assert p.toString() == &#39;My name is Teapot&#39;
+</code></pre>
+<p>通过更改<code>resolveStrategy</code>，我们正在修改Groovy解析“隐式 this”引用的方式：在这种情况下，<code>name</code>将首先在委托中查找，如果未找到，则在所有者中查找。由于<code>name</code>是在委托中定义的，它是<code>Thing</code>的一个实例，因此使用此值。</p><p>如果其中一个委托人（或所有者）<strong>没有</strong>这样的方法或属性，则可以说明“委托优先”和“仅委托”或“所有者优先”和“仅所有者”之间的区别：</p><pre><code class="language-Groovy">class Person {
+    String name
+    int age
+    def fetchAge = { age }
+}
+class Thing {
+    String name
+}def p = new Person(name:&#39;Jessica&#39;, age:42)
+def t = new Thing(name:&#39;Printer&#39;)
+def cl = p.fetchAge
+cl.delegate = p
+assert cl() == 42
+cl.delegate = t
+assert cl() == 42
+cl.resolveStrategy = Closure.DELEGATE_ONLY
+cl.delegate = p
+assert cl() == 42
+cl.delegate = t
+try {
+    cl()
+    assert false
+} catch (MissingPropertyException ex) {
+    // &quot;age&quot; is not defined on the delegate
+}
+</code></pre>
+<p>在这个例子中，我们定义了两个类，它们都有一个<code>name</code>属性，但只有<code>Person</code>类声明了一个<code>age</code>。<code>Person</code>类还声明了一个引用<code>age</code>的闭包。我们可以将默认的解决策略从“所有者优先”更改为“仅代表”。由于闭包的所有者是<code>Person</code>类，那么我们可以检查，如果委托是<code>Person</code>的实例，则调用闭包是成功的，但是如果我们以委托作为<code>Thing</code>的实例来调用它，它会失败并出现<code>groovy .lang.MissingPropertyException</code>。尽管在<code>Person</code>类中定义了闭包，但没有使用所有者。</p><h2 id="4-gstrings中的闭包">4. GStrings中的闭包</h2>
+<p>采取以下代码：</p><pre><code class="language-Groovy">def x = 1
+def gs = &quot;x = ${x}&quot;
+assert gs == &#39;x = 1&#39;
+</code></pre>
+<p>代码的行为与你预期的一样，但是如果你添加以下内容会发生什么：</p><pre><code class="language-Groovy">x = 2
+assert gs == &#39;x = 2&#39;
+</code></pre>
+<p>你会看到断言失败了！有两个原因：</p><ul>
+<li>GString仅懒惰地执行值的<code>toString</code>表示</li>
+<li>GString 中的语法<code>${x}</code>​<strong>不</strong>代表闭包，而是<code>$x</code>的<strong>表达式</strong>，在创建GString时进行执行。</li>
+</ul>
+<p>在我们的示例中，<code>GString</code>是使用引用<code>x</code>的表达式创建的。创建<code>GString</code>时，<code>x</code>的<strong>值</strong>为 1，因此创建的<code>GString</code>的值为 1。触发断言时，执行<code>GString</code>并使用<code>toString</code>将 1 转换为<code>String</code>。当我们将<code>x</code>更改为 2 时，我们确实更改了<code>x</code>的值，但它是一个不同的对象，并且<code>GString</code>仍然引用旧的对象。</p><table>
+<thead>
+<tr>
+<th><br /></th>
+<th>只有当<code>GString</code>引用的值发生变化时，<code>GString</code>才会更改其<code>toString</code>表示。如果引用发生变化，什么都不会发生。</th>
+</tr>
+</thead>
+</table>
+<p>如果你需要 GString 中的真正闭包，例如强制对变量进行惰性求值，则需要使用替代语法<code>${→ x}</code>，如固定示例中所示：</p><pre><code class="language-Groovy">def x = 1
+def gs = &quot;x = ${-&gt; x}&quot;
+assert gs == &#39;x = 1&#39;
+
+x = 2
+assert gs == &#39;x = 2&#39;
+</code></pre>
+<p>让我们用这段代码来说明它与变体有何不同：</p><pre><code class="language-Groovy">class Person {
+    String name
+    String toString() { name }          (1)
+}
+def sam = new Person(name:&#39;Sam&#39;)        (2)
+def lucy = new Person(name:&#39;Lucy&#39;)      (3)
+def p = sam                             (4)
+def gs = &quot;Name: ${p}&quot;                   (5)
+assert gs == &#39;Name: Sam&#39;                (6)
+p = lucy                                (7)
+assert gs == &#39;Name: Sam&#39;                (8)
+sam.name = &#39;Lucy&#39;                       (9)
+assert gs == &#39;Name: Lucy&#39;               (10)
+</code></pre>
+
+            ]]>
+        </content>
+    </entry>
+    <entry>
+        <title>记忆中的经典怀旧游戏整理</title>
+        <author>
+            <name>Jobs.Lee</name>
+        </author>
+        <link href="https://jobslee0.github.io/ji-yi-zhong-de-jing-dian-huai-jiu-you-xi-zheng-li.html"/>
+        <id>https://jobslee0.github.io/ji-yi-zhong-de-jing-dian-huai-jiu-you-xi-zheng-li.html</id>
+
+        <updated>2022-01-23T21:34:00+08:00</updated>
+            <summary>
+                <![CDATA[
+                    2022年，农历新年将近。 时光荏苒，或成人易有所感，怀旧心切，思绪万千，遂按记忆时序，搜聚各阶段PC游戏，以供怀念与把玩。 经典之所以经典，是因为大家纯粹的情怀和感情的寄托。 那时候太小，记事虽然不是很清晰，但是在“小霸王”游戏机上的快乐我竟然还记得？！ 曾几何时，在城南的一个小角落，有几条小路、几个孩童和几台电脑，仅凭借Windows 98、XP，还有小伙伴家一条“高速”网线，构建了童年的另一片天地。&hellip;
+                ]]>
+            </summary>
+        <content type="html">
+            <![CDATA[
+                <p>2022年，农历新年将近。</p><p>时光荏苒，或成人易有所感，怀旧心切，思绪万千，遂按记忆时序，搜聚各阶段PC游戏，以供怀念与把玩。</p><p>经典之所以经典，是因为大家纯粹的情怀和感情的寄托。</p><hr>
+<ul>
+<li>2002之前</li>
+</ul>
+<blockquote>
+<p>那时候太小，记事虽然不是很清晰，但是在“小霸王”游戏机上的快乐我竟然还记得？！</p></blockquote>
+<ul>
+<li>2002-2008</li>
+</ul>
+<blockquote>
+<p>曾几何时，在城南的一个小角落，有几条小路、几个孩童和几台电脑，仅凭借Windows 98、XP，还有小伙伴家一条“高速”网线，构建了童年的另一片天地。</p></blockquote>
+<ol>
+<li><p><a href="https://www.zhtmax.cn/post/53.html">侍魂2-霸王丸地狱变（非模拟器版真的非常难找）</a></p></li>
+<li><p><a href="https://btfile.hyds360.com:4433/m/3DMGAME-Age_Of_Empires.V1.0.CHS.Green.rar.torrent">帝国时代1-罗马复兴（去找激光兵秘籍！）</a></p></li>
+<li><p><a href="https://dl1.qwp365.cn/wangzhifu/StarCraft.v1.08.EN.Green-3DM.torrent">星际争霸1（当时太小，全是英文，玩不懂）</a></p></li>
+<li><p><a href="todo">红警2-共和国之辉</a></p></li>
+<li><p><a href="https://www.zhtmax.cn/post/54.html">雷电2</a></p></li>
+<li><p><a href="todo">三国群英传1</a></p></li>
+<li><p><a href="todo">GTA2</a></p></li>
+<li><p><a href="todo">GTA VC</a></p></li>
+<li><p><a href="https://dl2.qwp365.cn/wangzhifu/3DMGAME-CS1.5.CHS.Green.rar.torrent">CS1.5</a></p></li>
+<li><p><a href="https://btfile.hyds360.com:4433/m/3DMGAME-Counter_Strike.Ver.3213.CHS.Green.rar.torrent">CS1.6</a></p></li>
+<li><p><a href="">拳皇97-2000（当年我叔拿着朋友家的光盘，用虚拟光驱拷贝了老久，结果玩了两把被我误点卸载了23333）</a></p></li>
+<li><p><a href="https://btfile.hyds360.com:4433/m/3DMGAME_Dodge_ball_2.CHS.Green.rar.torrent">热血躲避球（某一天一个小伙伴拿来一个光盘，上面就是这个游戏）</a></p></li>
+<li><p><a href="https://qqtang.qq.com/index.shtml">QQ堂</a></p></li>
+<li><p><a href="https://sg.qq.com/web201706/index.shtml">QQ三国</a></p></li>
+<li><p><a href="http://www.ourgame.com/download/">联众世界</a></p></li>
+<li><p><a href="https://qqgame.qq.com">QQ游戏平台</a></p></li>
+<li><p><a href="http://www.mugrb.com">英雄奇迹（后来才知道是奇迹MU的国产私服吧）</a></p></li>
+<li><p><a href="http://mland.58qiqu.com/index.html">梦幻国度</a></p></li>
+<li><p><a href="http://www.4399.com/flash/1602.htm">4399-黄金矿工</a></p></li>
+<li><p><a href="http://www.4399.com/flash/3407.htm">4399-武林外传</a></p></li>
+</ol>
+<blockquote>
+<p>说个有关手游的画外音，这个阶段手机还停留在诺基亚，国产手机的印象也不是很深；当时手机平台网络流量很贵，动不动10几块没了，QQ还停留在1元短信注册和挂机年代，现在想想感觉有点不可思议～</p></blockquote>
+<ul>
+<li>2009-2011</li>
+</ul>
+<blockquote>
+<p>互联网宽带开始普及，还记得当时网通拨号那熟悉的界面，那时候的XP还盛行着雨林木风、番茄花园等众多“国产定制”版本，也算是终于用上了XP和连上了宽带，同时也是我个人网游时代的开启，腾讯游戏开始疯狂发展，同时代还充斥着大量的页游。</p></blockquote>
+<ol>
+<li><p><a href="https://dnf.qq.com/main.shtml">DNF</a></p></li>
+<li><p><a href="https://cf.qq.com/main.shtml?ADTAG=EventBlackTop.button.btnav.ecter">CF</a></p></li>
+<li><p><a href="http://tl.changyou.com/main.shtml">天龙八部（天龙的国风美工没话说，现在想起来还极富吸引力）</a></p></li>
+<li><p><a href="https://zhuxian.wanmei.com/main.htm">诛仙（飞骑和美工堪称一绝）</a></p></li>
+<li><p><a href="https://www.shumenol.com/index.html">蜀门（低配神游，绝了）</a></p></li>
+<li><p><a href="https://popkart.tiancity.com/homepage/v2/">跑跑卡丁车</a></p></li>
+<li><p><a href="https://www.cga.com.cn">浩方对战平台</a></p></li>
+<li><p><a href="">QQ对战平台</a></p></li>
+<li><p><a href="http://t.imop.com/index.html">页游-天书奇谈</a></p></li>
+<li><p><a href="http://molez.61.com">页游-摩尔庄园</a></p></li>
+<li><p><a href="http://www.4399.com/flash/zmhj.htm">页游-造梦西游</a></p></li>
+<li><p><a href="https://seer.61.com">页游-赛尔号</a></p></li>
+<li><p><a href="http://www.4399.com/flash/12439.htm">页游-弹弹堂</a></p></li>
+</ol>
+<blockquote>
+<p> 这个阶段出现了很多国产手机及平台，诸如斯凯、展讯MRP（说个大家耳熟能祥的名字“冒泡社区”，这个大家应该有印象，还有*#220807#神秘代码，当时社区教会的我们去煞费苦心改十六进制破解），当然还有jra平台（跟java的jar正好调整了位置）；当然，诺基亚自带的Java模拟器平台也很强大，游戏神作也不少～</p></blockquote>
+<ul>
+<li>2012-2014</li>
+</ul>
+<blockquote>
+<p>这几年随着智能机的出现，移动互联开始飞速发展，这个阶段网游和单机的记忆不是很深了，主要可能是打游戏的时间不多了。</p></blockquote>
+<hr>
+<p>到这里能想到的，也总结的差不多了，比较零散，想到什么就写什么，对资源简单的整合了一下（像flash这种游戏考虑可以下载到本地，并附以HTML就可以实现本地持久化了），当然后面根据情况会再做完善。</p><blockquote>
+<p>可以发现大部分游戏官网都还是保留着，只是版本迭代的变化比较大；对于网游来讲，一旦走向没落的，只能通过下载私服来怀念一下了，而对于单机来讲，官网可能大多数都找不到了，主要是资源的整合，找个网盘收藏一下还是值得的，像很多移植来PC的游戏能搜索到的大多数是模拟器，能找到原味资源实属不易！</p></blockquote>
+<p>漫无目的的总结这些思绪，或许只是为了回味一下。想想能够经历这个信息时代的洗礼，这个过程还是蛮有趣的。日后若某一天还能和发小一起怀念下，也就此足矣。</p><hr>
+<p>壬寅虎年将至，难得抽空，让思绪自由的飞远，回忆起那些岁月的点点滴滴，零零碎碎的汇聚于此，也当不虚此忆。</p><p>时代变迁，事物易逝。愿吾辈不忘初心，常回首，思今日，展未来！</p>
+            ]]>
+        </content>
+    </entry>
+    <entry>
+        <title>关于</title>
+        <author>
+            <name>Jobs.Lee</name>
+        </author>
+        <link href="https://jobslee0.github.io/guan-yu.html"/>
+        <id>https://jobslee0.github.io/guan-yu.html</id>
+
+        <updated>2019-01-25T19:09:00+08:00</updated>
+            <summary>
+                <![CDATA[
+                    🏠 关于本站 温故而知新。 偶尔或者经常来记录在技术路上的点点滴滴，当然还会有一些爱好和生活的碎碎念。 一个好的开发者是需要长时间的学习、坚持和积淀的，而思考和总结则是不断前行的不二法门。工作已有数年，深知记录、思考和总结的重要性，却迟迟未有践行。 摒除浮躁，愿以此为契机，在此桃源之地，更加鞭策自己，不断进步！
+                ]]>
+            </summary>
+        <content type="html">
+            <![CDATA[
+                <h2 id="🏠-关于本站">🏠 关于本站</h2>
+<p>温故而知新。</p><p>偶尔或者经常来记录在技术路上的点点滴滴，当然还会有一些爱好和生活的碎碎念。</p><p>一个好的开发者是需要长时间的学习、坚持和积淀的，而思考和总结则是不断前行的不二法门。工作已有数年，深知记录、思考和总结的重要性，却迟迟未有践行。</p><p>摒除浮躁，愿以此为契机，在此桃源之地，更加鞭策自己，不断进步！</p>
+            ]]>
+        </content>
+    </entry>
+</feed>

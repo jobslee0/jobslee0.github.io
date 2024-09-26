@@ -1,0 +1,176 @@
+<!DOCTYPE html><html lang="zh-cn"><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>【翻译】Groovy编程风格指南 - Z.H.</title><meta name="robots" content="noindex,nofollow"><meta name="generator" content="Publii Open-Source CMS for Static Site"><script type="text/javascript" async src="https://www.googletagmanager.com/gtag/js?id=6694651183"></script><script type="text/javascript">window.dataLayer = window.dataLayer || [];
+				  function gtag(){dataLayer.push(arguments);}
+				  gtag('js', new Date());
+				  gtag('config', '6694651183' );
+				  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-NRGQEGZN7K"></script><script>window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-NRGQEGZN7K');</script><link rel="alternate" type="application/atom+xml" href="https://jobslee0.github.io/feed.xml"><link rel="alternate" type="application/json" href="https://jobslee0.github.io/feed.json"><meta property="og:title" content="【翻译】Groovy编程风格指南"><meta property="og:site_name" content="Z.H."><meta property="og:description" content="一个踏上了Groovy冒险之旅的Java开发者，会先基于烂熟于心的Java，然后再逐步的学习Groovy，一次一个特性的，最后将能够有效、习惯的使用Groovy编写代码。 这个文档旨在给在这条路上的开发者一个指导，传授一些常用的Groovy语法格式、新的操作和新的特性，譬如闭包等。这个指导文档不是完善的，仅仅作为一个进阶的快速介绍和基础指南，你可以对文档进行贡献和改进。 当你是C / C++ /&hellip;"><meta property="og:url" content="https://jobslee0.github.io/fan-yi-groovybian-cheng-feng-ge-zhi-nan.html"><meta property="og:type" content="article"><link rel="shortcut icon" href="https://jobslee0.github.io/media/website/photo2pixel_download-2.png" type="image/x-icon"><link rel="preload" href="https://jobslee0.github.io/assets/dynamic/fonts/jetbrainsmono/jetbrainsmono.woff2" as="font" type="font/woff2" crossorigin><link rel="preload" href="https://jobslee0.github.io/assets/dynamic/fonts/jetbrainsmono/jetbrainsmono-italic.woff2" as="font" type="font/woff2" crossorigin><link rel="stylesheet" href="https://jobslee0.github.io/assets/css/style.css?v=82007ae11cb9f2a56571c770331b13e7"><script type="application/ld+json">{"@context":"http://schema.org","@type":"Article","mainEntityOfPage":{"@type":"WebPage","@id":"https://jobslee0.github.io/fan-yi-groovybian-cheng-feng-ge-zhi-nan.html"},"headline":"【翻译】Groovy编程风格指南","datePublished":"2023-01-09T15:45","dateModified":"2024-09-26T23:02","description":"一个踏上了Groovy冒险之旅的Java开发者，会先基于烂熟于心的Java，然后再逐步的学习Groovy，一次一个特性的，最后将能够有效、习惯的使用Groovy编写代码。 这个文档旨在给在这条路上的开发者一个指导，传授一些常用的Groovy语法格式、新的操作和新的特性，譬如闭包等。这个指导文档不是完善的，仅仅作为一个进阶的快速介绍和基础指南，你可以对文档进行贡献和改进。 当你是C / C++ /&hellip;","author":{"@type":"Person","name":"Jobs.Lee","url":"https://jobslee0.github.io/authors/jobslee/"},"publisher":{"@type":"Organization","name":"Jobs.Lee"}}</script><noscript><style>img[loading] {
+                    opacity: 1;
+                }</style></noscript></head><body class="post-template"><div class="container container--center"><header class="header"><div class="header__logo"><a class="logo" href="https://jobslee0.github.io/">Z.H.</a></div></header><main class="content"><article class="post"><header><h1 class="post__title">【翻译】Groovy编程风格指南</h1><div class="post__meta"><time datetime="2023-01-09T15:45" class="post__date">一月 9, 2023 </time><span class="post__author"><a href="https://jobslee0.github.io/authors/jobslee/" class="feed__author">Jobs.Lee</a></span></div></header><div class="post__entry"><p>一个踏上了Groovy冒险之旅的Java开发者，会先基于烂熟于心的Java，然后再逐步的学习Groovy，一次一个特性的，最后将能够有效、习惯的使用Groovy编写代码。 这个文档旨在给在这条路上的开发者一个指导，传授一些常用的Groovy语法格式、新的操作和新的特性，譬如闭包等。这个指导文档不是完善的，仅仅作为一个进阶的快速介绍和基础指南，你可以对文档进行贡献和改进。</p><h2 id="1-无分号">1. 无分号</h2><p>当你是C / C++ / C# / Java背景的程序员时，已经习惯了处处使用分号。糟糕的是，Groovy支持了99%的Java语法，有时候复制Java代码到Groovy程序是十分容易的，这样就导致了分号大量的出现。可是，分号在Groovy里是可选的，你可以忽略它们，甚至于习惯移除它们。</p><h2 id="2-可选的return关键字">2. 可选的Return关键字</h2><p>在Groovy中，方法体最后一行的表达式能够被返回而无需<code>return</code>关键字。尤其是在闭包的短方法中，忽略关键字使它看起来更优雅：</p><pre><code class="language-Groovy">String toString() { return &quot;a server&quot; }
+String toString() { &quot;a server&quot; }
+</code></pre><p>但是当你使用变量时，它看起来不太友好，仿佛在两行里出现了两次：</p><pre><code class="language-Groovy">def props() {
+    def m1 = [a: 1, b: 2]
+    m2 = m1.findAll { k, v -&gt; v % 2 == 0 }
+    m2.c = 3
+    m2
+}
+</code></pre><p>通过这个例子，要么在最后一个表达式前换行，要么使用<code>return</code>关键字来提升可读性。</p><p>我自己有时候用<code>return</code>关键字，有时候不用，这是个人喜好问题。但是举例来讲，在闭包内部，我通常会更多的忽略它。所以即使这个关键词是可选的，也并不意味着在它阻碍了代码可读性时，还要强制去掉它。</p><p>请注意，当使用<code>def</code>关键字取代指定具体的类型去定义一个方法时，你可能惊讶的发现最后一个表达式会被返回。所以通常更倾向于使用一个特别指定返回值类型譬如void或者其他类型。在上面的例子中，假设我们忘记了通过最后一个表达式去返回m2，导致最后的表达式变成了<code>m2.c = 3</code>，最后会返回<code>3</code>，而不是你所期望的值。</p><p><code>if</code> / <code>else</code> , <code>try</code> / <code>catch</code> 这些声明同样可以返回一个值，因为这里有“最后一个表达式”在这些声明中：</p><pre><code class="language-Groovy">def foo(n) {
+    if(n == 1) {
+        &quot;Roshan&quot;
+    } else {
+        &quot;Dawrani&quot;
+    }
+}assert foo(1) == &quot;Roshan&quot;
+assert foo(2) == &quot;Dawrani&quot;
+</code></pre><h2 id="3-def和类型">3. Def和类型</h2><p>当我们讨论<code>def</code>和类型，我经常看到开发者同时使用<code>def</code>和类型。其实<code>def</code>在这里是多余的。所以我们需要对<code>def</code>和类型进行二选一。</p><p>不要这样写：</p><pre><code class="language-Groovy">def String name = &quot;Guillaume&quot;
+</code></pre><p>而是这样：</p><pre><code class="language-Groovy">String name = &quot;Guillaume&quot;
+</code></pre><p>当在Groovy中使用<code>def</code>，对象实际的类型是<code>Object</code>（所以使用<code>def</code>定义的变量可以分配任何类型的对象，同时如果一个方法声明返回<code>def</code>则可以返回任何类型的对象）。</p><p>当使用无类型参数定义一个方法，你可以使用<code>def</code>关键字，但是不是必须的，我们更倾向于忽略它。以下方法可以被替代：</p><pre><code class="language-Groovy">void doSomething(def param1, def param2) { }
+</code></pre><p>更建议：</p><pre><code class="language-Groovy">void doSomething(param1, param2) { }
+</code></pre><p>但是就像上部分文档提到的，通常为了帮助规范化你的代码，为了帮助IDE进行代码提示，或者为了利用Groovy的静态类型检查和静态类型编译，指定方法参数类型是更好的选择。</p><p>另外一点，定义构造函数时应该避免使用<code>def</code>：</p><pre><code class="language-Groovy">class MyClass {
+    def MyClass() {}
+}
+</code></pre><p>取而代之，应该移除<code>def</code>：</p><pre><code class="language-Groovy">class MyClass {
+    MyClass() {}
+}
+</code></pre><h2 id="4-默认的public">4. 默认的Public</h2><p>默认情况下，Groovy认为类和方法都是<code>public</code>的。所以你不需要到处重复使用<code>public</code>修饰符。只有当不是public时，你需要指定可见性修饰符。</p><p>可以取代以下代码：</p><pre><code class="language-Groovy">public class Server {
+    public String toString() { return &quot;a server&quot; }
+}
+</code></pre><p>更简洁的表达：</p><pre><code class="language-Groovy">class Server {
+    String toString() { &quot;a server&quot; }
+}
+</code></pre><p>你可能想知道包范围的可见性，事实上，Groovy允许忽略’public’意味着这个范围默认情况下不再被支持，这里有一个特殊的Groovy注解允许你使用这个可见性修饰符：</p><pre><code class="language-Groovy">class Server {
+    @PackageScope Cluster cluster
+}
+</code></pre><h2 id="5-可忽略的括号">5. 可忽略的括号</h2><p>Groovy允许你忽略顶级表达式中的括号，譬如<code>println</code>指令：</p><pre><code class="language-Groovy">println &quot;Hello&quot;
+method a, b
+</code></pre><p>对照：</p><pre><code class="language-Groovy">println(&quot;Hello&quot;)
+method(a, b)
+</code></pre><p>当一个闭包是一个方法调用的最后一个参数时，就像使用Groovy的<code>each{}</code>迭代器一样，你可以把闭包放在闭合的括号内，甚至也可以忽略括号：</p><pre><code class="language-Groovy">list.each( { println it } )
+list.each(){ println it }
+list.each  { println it }
+</code></pre><p>第三种方式是一直推崇的，更自然，一对空括号就像是语句中无用的废话。</p><p>在某些情况下括号是必须的，例如在进行嵌套方法调用或调用不带参数的方法时。</p><pre><code class="language-Groovy">def foo(n) { n }
+def bar() { 1 }
+
+println foo 1 // won&#39;t work
+def m = bar   // won&#39;t work
+</code></pre><h2 id="6-classes是一等公民">6. Classes是一等公民</h2><p>在Groovy中<code>.class</code>后缀不是必须的，有点像Java的<code>instanceof</code>。</p><p>举个例子：</p><pre><code class="language-Groovy">connection.doPost(BASE_URI + &quot;/modify.hqu&quot;, params, ResourcesResponse.class)
+</code></pre><p>使用GStrings的例子，并使用一等公民的方式替代上面的写法：</p><pre><code class="language-Groovy">connection.doPost(&quot;${BASE_URI}/modify.hqu&quot;, params, ResourcesResponse)
+</code></pre><h2 id="7-getters和setters方法">7. Getters和Setters方法</h2><p>在Groovy中，getter和setter形成了我们所说的“属性”，并提供访问和设置此类属性的快捷方法。因此替代Java的调用方式，可以使用类似的字段获取方法：</p><pre><code class="language-Groovy">resourceGroup.getResourcePrototype().getName() == SERVER_TYPE_NAME
+resourceGroup.resourcePrototype.name == SERVER_TYPE_NAME
+
+resourcePrototype.setName(&quot;something&quot;)
+resourcePrototype.name = &quot;something&quot;
+</code></pre><p>当你在Groovy中写你的beans（经常被叫做POGO (Plain Old Groovy Object)）时，你不必再自行创建字段的getter/setter的方法，这些将由Groovy编译器来帮你做。</p><p>可以替代这些：</p><pre><code class="language-Groovy">class Person {
+    private String name
+    String getName() { return name }
+    void setName(String name) { this.name = name }
+}
+</code></pre><p>简化为：</p><pre><code class="language-Groovy">class Person {
+    String name
+}
+</code></pre><p>正如你所看到的，一个没有可见修饰符的字段实际上会由Groovy编译器去生成一个私有的字段以及getter/setter方法。</p><p>在Java中使用此类POGO时，getter和setter方法实际存在，可以照常使用。</p><p>尽管编译器创建了通常的getter/setter逻辑，但如果你希望在这些getter/setter中做任何额外或不同的事情，你仍然可以自由地提供它们，编译器将使用你的逻辑，而不是默认生成的逻辑。</p><h2 id="8-使用命名参数和默认构造函数初始化-bean">8. 使用命名参数和默认构造函数初始化 bean</h2><p>举一个bean的例子：</p><pre><code class="language-Groovy">class Server {
+    String name
+    Cluster cluster
+}
+</code></pre><p>而不是在后续语句中设置每个 setter，如下所示：</p><pre><code class="language-Groovy">def server = new Server()
+server.name = &quot;Obelix&quot;
+server.cluster = aCluster
+</code></pre><p>你可以将命名参数与默认构造函数一起使用（首先调用构造函数，然后按照在映射中指定的顺序调用设置）：</p><pre><code class="language-Groovy">def server = new Server(name: &quot;Obelix&quot;, cluster: aCluster)
+</code></pre><h2 id="9-使用-with-和-tap-对同一个-bean-进行重复操作">9. 使用 with() 和 tap() 对同一个 bean 进行重复操作</h2><p>当你创建一个新的实例的时候，使用名称-参数的默认构造方法是有趣的，但是如果你在更新一个实例的时候，你是否不得不重复’server’前缀？不，感谢Groovy为所有类型对象提供的<code>with()</code>和<code>tap()</code>方法：</p><pre><code class="language-Groovy">server.name = application.name
+server.status = status
+server.sessionCount = 3
+server.start()
+server.stop()
+</code></pre><p>对比：</p><pre><code class="language-Groovy">server.with {
+    name = application.name
+    status = status
+    sessionCount = 3
+    start()
+    stop()
+}
+</code></pre><p>与 Groovy 中的任何闭包一样，最后一条语句被视为返回值。在上面的例子中，返回的结果是<code>stop()</code>。想要使用这种方式构建只返回传入的对象，可以使用<code>tap()</code>方法：</p><pre><code class="language-Groovy">def person = new Person().with {
+    name = &quot;Ada Lovelace&quot;
+    it // Note the explicit mention of it as the return value
+}
+</code></pre><p>对比：</p><pre><code class="language-Groovy">def person = new Person().tap {
+    name = &quot;Ada Lovelace&quot;
+}
+</code></pre><p>注意：你也可以使用 <code>with(true)</code> 代替 <code>tap()</code> 和 <code>with(false)</code> 代替 <code>with()</code> 。</p><h2 id="10-equals和">10. Equals和<code>==</code></h2><p>Java的<code>==</code>实际上等同于Groovy的<code>is()</code>方法，Groovy的<code>==</code>是更智能的<code>equals()</code>！</p><p>在比较对象引用的过程中，需要使用<code>a.is(b)</code>去替代<code>==</code>。</p><p>但是比起使用<code>equals()</code>比较，你应该更喜欢Groovy的<code>==</code>，并且它对<code>NullPointerException</code>进行了规避处理，与为<code>null</code>变量在左边和在右边无关。</p><p>为了替代如下：</p><pre><code class="language-Groovy">status != null &amp;&amp; status.equals(ControlConstants.STATUS_COMPLETED)
+</code></pre><p>可以这么做：</p><pre><code class="language-Groovy">status == ControlConstants.STATUS_COMPLETED
+</code></pre><h2 id="11-gstrings（插值，多行）">11. GStrings（插值，多行）</h2><p>我们在Java中经常使用字符串和变量连接，导致有许多开闭的双引号、加号、以及<code>\n</code>换行符。通过插值字符串（叫做GStrings），这样的字符串看起来更友好，输入起来也不那么痛苦：</p><pre><code class="language-Groovy">throw new Exception(&quot;Unable to convert resource: &quot; + resource)
+</code></pre><p>对比：</p><pre><code class="language-Groovy">throw new Exception(&quot;Unable to convert resource: ${resource}&quot;)
+</code></pre><p>在大括号里面，你可以放入任何类型的表达式，而不仅仅是变量。譬如，简单的变量、<code>variable.property</code>，你甚至可以去掉大括号：</p><pre><code class="language-Groovy">throw new Exception(&quot;Unable to convert resource: $resource&quot;)
+</code></pre><p>你甚至可以通过闭包<code>${-&gt; resource }</code>来延迟执行这些表达式。当GString被强制转换为String时，它将执行闭包然后调用<code>toString()</code>方法来表示返回值。</p><p>举例：</p><pre><code class="language-Groovy">int i = 3def s1 = &quot;i&#39;s value is: ${i}&quot;
+def s2 = &quot;i&#39;s value is: ${-&gt; i}&quot;
+
+i++assert s1 == &quot;i&#39;s value is: 3&quot; // eagerly evaluated, takes the value on creation
+assert s2 == &quot;i&#39;s value is: 4&quot; // lazily evaluated, takes the new value into account
+</code></pre><p>当字符串及其连接的表达式在Java中很长时：</p><pre><code class="language-Groovy">throw new PluginException(&quot;Failed to execute command list-applications:&quot; +
+    &quot; The group with name &quot; +
+    parameterMap.groupname[0] +
+    &quot; is not compatible group of type &quot; +
+    SERVER_TYPE_NAME)
+</code></pre><p>您可以使用<code>\</code>连续字符（这不是多行字符串）：</p><pre><code class="language-Groovy">throw new PluginException(&quot;Failed to execute command list-applications: \
+The group with name ${parameterMap.groupname[0]} \
+is not compatible group of type ${SERVER_TYPE_NAME}&quot;)
+</code></pre><p>或者使用带三引号的多行字符串：</p><pre><code class="language-Groovy">throw new PluginException(&quot;&quot;&quot;Failed to execute command list-applications:
+    The group with name ${parameterMap.groupname[0]}
+    is not compatible group of type ${SERVER_TYPE_NAME)}&quot;&quot;&quot;)
+</code></pre><p>您还可以通过在该字符串上调用 <code>.stripIndent()</code> 来去除出现在多行字符串左侧的缩进。</p><p>还要注意单引号和双引号在Groovy中的不同：单引号一直被拿来创建Java不包含插值的字符串，然而当存在插值时，双引号将会创建Java字符串或者GStrings。</p><p>对于多行字符串，你可以使用三重引号：即 GStrings 的三重双引号和纯字符串的三重单引号。</p><p>如果你需要写正则表达式，你可以使用“斜线”字符串表示法：</p><pre><code class="language-Groovy">assert &quot;foooo/baaaaar&quot; ==~ /fo+\/ba+r/
+</code></pre><p>“斜线”表示法的优点是您不需要双转义反斜杠，使使用正则表达式更简单。</p><p>最后，当你需要字符串常量的时候更建议使用单引号，当你需要依赖字符串插值的时候要使用双引号。</p><h2 id="12-数据结构的原生语法">12. 数据结构的原生语法</h2><p>Groovy为lists、maps、regex或ranges提供了原生的数据结构语法。确保在你的Groovy程序中去使用它。</p><p>这些原生数据结构的例子：</p><pre><code class="language-Groovy">def list = [1, 4, 6, 9]// by default, keys are Strings, no need to quote them
+// you can wrap keys with () like [(variableStateAcronym): stateName] to insert a variable or object as a key.
+def map = [CA: &#39;California&#39;, MI: &#39;Michigan&#39;]// ranges can be inclusive and exclusive
+def range = 10..20 // inclusive
+assert range.size() == 11
+// use brackets if you need to call a method on a range definition
+assert (10..&lt;20).size() == 10 // exclusivedef pattern = ~/fo*/// equivalent to add()
+list &lt;&lt; 5// call contains()
+assert 4 in list
+assert 5 in list
+assert 15 in range
+
+// subscript notation
+assert list[1] == 4// add a new key value pair
+map &lt;&lt; [WA: &#39;Washington&#39;]
+// subscript notation
+assert map[&#39;CA&#39;] == &#39;California&#39;
+// property notation
+assert map.WA == &#39;Washington&#39;// matches() strings against patterns
+assert &#39;foo&#39; ==~ pattern
+</code></pre><h2 id="13-groovy开发工具包">13. Groovy开发工具包</h2><p>继续谈论这些数据结构，当你去遍历集合时，Groovy提供了很多的附加方法来装饰Java代码的数据结构，譬如<code>each{}</code> , <code>find{}</code> , <code>findAll{}</code> , <code>every{}</code> , <code>collect{}</code> , <code>inject{}</code>。这些方法为编程语言提供了新的功能特性，能够更简单的来实现复杂的算法。由于语言的动态特性，许多新方法通过修饰应用于各种类型。你可以发现很多非常有用的方法在String, Files, Streams, Collections等数据结构中：</p><p><a href="http://groovy-lang.org/gdk.html">http://groovy-lang.org/gdk.html</a></p><h2 id="14-强大的switch">14. 强大的switch</h2><p>Groovy的<code>switch</code>比起直接只受原语和同化的C-ish语言更加强大。Groovy的<code>switch</code>接收几乎任何类型的参数。</p><pre><code class="language-Groovy">def x = 1.23
+def result = &quot;&quot;
+switch (x) {
+    case &quot;foo&quot;: result = &quot;found foo&quot;
+    // lets fall through
+    case &quot;bar&quot;: result += &quot;bar&quot;
+    case [4, 5, 6, &#39;inList&#39;]:
+        result = &quot;list&quot;
+        break
+    case 12..30:
+        result = &quot;range&quot;
+        break
+    case Integer:
+        result = &quot;integer&quot;
+        break
+    case Number:
+        result = &quot;number&quot;
+        break
+    case { it &gt; 3 }:
+        result = &quot;number &gt; 3&quot;
+        break
+    default: result = &quot;default&quot;
+}
+assert result == &quot;number&quot;
+</code></pre><p>更进一步来讲，带有 <code>isCase()</code> 方法的类型也可以决定一个值是否与一个case相对应。</p><h2 id="15-import别名">15. Import别名</h2><p>在Java中，当你使用两个不同包但同名的类时，譬如<code>java.util.List</code>和<code>java.awt.List</code>，你只能导入一个类，然后不得不通过使用完全限定名来使用另外一个类。</p><p>有时候在代码中，多个长类名的调用可能显得代码冗长且降低了代码的清晰度。</p><p>为了改善这些场景，Groovy提供了导入别名的特性：</p></div><footer class="wrapper post__footer"><p class="post__last-updated">This article was updated on 九月 26, 2024</p><div class="post__share"></div></footer><nav class="pagination"><div class="pagination__title"><span>Read other posts</span></div><div class="pagination__buttons"><a href="https://jobslee0.github.io/fan-yi-groovyying-yong-ji-cheng.html" class="btn previous" rel="prev" aria-label="[MISSING TRANSLATION]:  【翻译】Groovy应用集成 "><span class="btn__icon">←</span> <span class="btn__text">【翻译】Groovy应用集成</span> </a><a href="https://jobslee0.github.io/fan-yi-groovyying-yong-ji-cheng.html" class="btn next" rel="next" aria-label="[MISSING TRANSLATION]:  【翻译】Groovy应用集成 "><span class="btn__text">【翻译】Groovy应用集成</span> <span class="btn__icon">→</span></a></div></nav></article></main><footer class="footer"><div class="footer__inner"><div class="footer__copyright"><p>© 2024 Powered by Publii CMS :: <a href="https://github.com/panr/hugo-theme-terminal" target="_blank" rel="noopener">Theme</a> ported by the <a href="https://getpublii.com/customization-service/" target="_blank" rel="noopener">Publii Team</a></p></div></div></footer></div><script defer="defer" src="https://jobslee0.github.io/assets/js/scripts.min.js?v=c2232aa7558e9517946129d2a1b8c770"></script><script>window.publiiThemeMenuConfig={mobileMenuMode:'sidebar',animationSpeed:300,submenuWidth: 'auto',doubleClickTime:500,mobileMenuExpandableSubmenus:true,relatedContainerForOverlayMenuSelector:'.top'};</script><script>var images = document.querySelectorAll('img[loading]');
+        for (var i = 0; i < images.length; i++) {
+            if (images[i].complete) {
+                images[i].classList.add('is-loaded');
+            } else {
+                images[i].addEventListener('load', function () {
+                    this.classList.add('is-loaded');
+                }, false);
+            }
+        }</script></body></html>
