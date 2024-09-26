@@ -3,7 +3,7 @@
     <title>Z.H.</title>
     <link href="https://jobslee0.github.io/feed.xml" rel="self" />
     <link href="https://jobslee0.github.io" />
-    <updated>2024-09-26T23:03:20+08:00</updated>
+    <updated>2024-09-26T23:55:29+08:00</updated>
     <author>
         <name>Jobs.Lee</name>
     </author>
@@ -26,7 +26,7 @@
         <content type="html">
             <![CDATA[
                 <p>PSQ是友缘在线早些年，由大师独自编写的一个轻量级队列，该队列开箱即用、效率高，可以达到每秒并发40000-50000个请求，并开创性提供了队列回溯消费的功能。</p><h3 id="技术架构">技术架构</h3>
-<figure class="post__image"><img loading="lazy" src="https://s2.51cto.com/images/blog/front/202404/11253a554aa26681360317cd2232534fef9255.png?x-oss-process=image/watermark,size_14,text_QDUxQ1RP5Y2a5a6i,color_FFFFFF,t_30,g_se,x_10,y_10,shadow_20,type_ZmFuZ3poZW5naGVpdGk=,x-oss-process=image/resize,m_fixed,w_1184/format,webp" alt=""  data-is-external-image="true"></figure><h3 id="核心原理">核心原理</h3>
+<figure class="post__image"><img loading="lazy" src="https://jobslee0.github.io/media/posts/10/11253a554aa26681360317cd2232534fef9255.webp" alt="Image description" width="866" height="720"  sizes="(min-width: 920px) 703px, (min-width: 700px) calc(82vw - 35px), calc(100vw - 81px)" srcset="https://jobslee0.github.io/media/posts/10/responsive/11253a554aa26681360317cd2232534fef9255-xs.webp 300w ,https://jobslee0.github.io/media/posts/10/responsive/11253a554aa26681360317cd2232534fef9255-sm.webp 480w ,https://jobslee0.github.io/media/posts/10/responsive/11253a554aa26681360317cd2232534fef9255-md.webp 768w ,https://jobslee0.github.io/media/posts/10/responsive/11253a554aa26681360317cd2232534fef9255-lg.webp 1024w"></figure><h3 id="核心原理">核心原理</h3>
 <ol>
 <li>底层数据结构：最底层使用了leansoft.bigqueue，此队列基于内存映射文件，实现了LRU及页映射特性</li>
 <li>数据结构扩展：基于原始队列，构建环形队列，并支持回溯、持久化（使用NIO）特性</li>
@@ -127,7 +127,7 @@ public class DirectMemoryExample {
 <li>jdk8小版本有对<strong>容器限制感知</strong>的修复，有一定用处（这块见参考文档3）</li>
 </ol>
 <h3 id="问题解决">问题解决</h3>
-<p>保持上面的解决方案和参数，我们的服务勉强保持了一段时间，只是相对拉长了容器被重启的时间，告警和重启依然存在，实在令人头疼，很明显还是存在JVM内存泄漏。</p><p>后来通过不断的排查监控大盘，我发现堆内内存经过FullGC后，可以做到到达临界线后不再增长，这说明了<strong>堆内参数大小和限制</strong>都起到了很好的作用；但是要知道，JVM还有一部分叫做<strong>堆外内存</strong>的东西，参数中限制了我们常知道的<strong>MetaSpace</strong>，在大盘中我却发现了<strong>non-heap memory</strong>部分总有比MetaSpace多出的300M，其增长趋势同pod内存一样一致，只是不是那么明显。</p><p>这引发了我进一步的思考，堆外内存是不是除了<strong>元数据区</strong>，还有一块未曾想到的区域？</p><p>经过翻查资料：</p><figure class="post__image"><img loading="lazy" src="https://s2.51cto.com/images/blog/front/202404/181492b213cbc6520373818bd65550e8b23c7a.png?x-oss-process=image/watermark,size_14,text_QDUxQ1RP5Y2a5a6i,color_FFFFFF,t_30,g_se,x_10,y_10,shadow_20,type_ZmFuZ3poZW5naGVpdGk=,x-oss-process=image/resize,m_fixed,w_1184" alt=""  data-is-external-image="true"></figure><p>发现有一块叫做<strong>Direct Memory</strong>的区域，这块区域就是我们常提到的<strong>NIO</strong>为了减少内存拷贝而直接申请的部分，这部分在常见数据库读写客户端中大量存在。</p><p>通过排查代码，果不其然，代码除了保留List大对象之外，还大量使用了<strong>RedisTemplate</strong>对象，这个客户端底层连接<strong>基于netty实现</strong>，正是NIO那部分。</p><p>于是，加上<code>-MaxDirectMemorySize</code>参数后，再次测试，JVM内存稳固被限制，果然没有问题了！而这个参数正是《深入理解JVM虚拟机》前几页所提到的——很多程序员会忽略的一个参数。</p><h3 id="问题总结">问题总结</h3>
+<p>保持上面的解决方案和参数，我们的服务勉强保持了一段时间，只是相对拉长了容器被重启的时间，告警和重启依然存在，实在令人头疼，很明显还是存在JVM内存泄漏。</p><p>后来通过不断的排查监控大盘，我发现堆内内存经过FullGC后，可以做到到达临界线后不再增长，这说明了<strong>堆内参数大小和限制</strong>都起到了很好的作用；但是要知道，JVM还有一部分叫做<strong>堆外内存</strong>的东西，参数中限制了我们常知道的<strong>MetaSpace</strong>，在大盘中我却发现了<strong>non-heap memory</strong>部分总有比MetaSpace多出的300M，其增长趋势同pod内存一样一致，只是不是那么明显。</p><p>这引发了我进一步的思考，堆外内存是不是除了<strong>元数据区</strong>，还有一块未曾想到的区域？</p><p>经过翻查资料：</p><figure class="post__image"><img loading="lazy" src="https://jobslee0.github.io/media/posts/4/181492b213cbc6520373818bd65550e8b23c7a.webp" alt="Image description" width="1706" height="818"  sizes="(min-width: 920px) 703px, (min-width: 700px) calc(82vw - 35px), calc(100vw - 81px)" srcset="https://jobslee0.github.io/media/posts/4/responsive/181492b213cbc6520373818bd65550e8b23c7a-xs.webp 300w ,https://jobslee0.github.io/media/posts/4/responsive/181492b213cbc6520373818bd65550e8b23c7a-sm.webp 480w ,https://jobslee0.github.io/media/posts/4/responsive/181492b213cbc6520373818bd65550e8b23c7a-md.webp 768w ,https://jobslee0.github.io/media/posts/4/responsive/181492b213cbc6520373818bd65550e8b23c7a-lg.webp 1024w"></figure><p>发现有一块叫做<strong>Direct Memory</strong>的区域，这块区域就是我们常提到的<strong>NIO</strong>为了减少内存拷贝而直接申请的部分，这部分在常见数据库读写客户端中大量存在。</p><p>通过排查代码，果不其然，代码除了保留List大对象之外，还大量使用了<strong>RedisTemplate</strong>对象，这个客户端底层连接<strong>基于netty实现</strong>，正是NIO那部分。</p><p>于是，加上<code>-MaxDirectMemorySize</code>参数后，再次测试，JVM内存稳固被限制，果然没有问题了！而这个参数正是《深入理解JVM虚拟机》前几页所提到的——很多程序员会忽略的一个参数。</p><h3 id="问题总结">问题总结</h3>
 <p>总的来看，这次的问题DirectMemory是一个主要问题，代码的大对象处理是一个次要问题，其次才应该考虑对JVM的FullGC次数进行优化。</p><p>毕竟，JVM是一个复杂的大工程，它已经帮我们很好的完成了对内存的管理；出现了内存泄漏不可怕，要从现象和问题本身出发，要从JVM本身出发，万万不能被所谓的“八股文”和“权威”给束缚住，上来就考虑GC优化往往只会迷失方向。</p><p>那些被刻板经验给忽略的，往往就是真相，仅此而已。</p><hr>
 <h5 id="参考文档">参考文档</h5>
 <ol>
@@ -158,7 +158,7 @@ public class DirectMemoryExample {
         <content type="html">
             <![CDATA[
                 <h3 id="mongodb底层实现是b树还是b树？">MongoDB底层实现是B树还是B+树？</h3>
-<p>答：<strong>B+树</strong></p><p>这个问题国内论坛真的是难以找到靠谱的答案，大部分给出的都是不准确的B树，当然B+树确实是B树的一种，但是准确的说当前版本MongoDB底层实现应该是B+树才是准确的。</p><p>下面来给出具体的说明：</p><p>我们知道MongoDB当下支持两种引擎，一个是默认的WiredTiger，另一个是In-Memory，In-Memory是保存在内存中，我们平时讨论和使用的是默认的WiredTiger（本讨论从MongoDB3.2将WiredTiger作为默认引擎的前提下展开，至于老版本的数据结构这里忽略掉）。</p><p>WiredTiger文档中有这么一句话：</p><figure class="post__image"><img loading="lazy" src="assets/network-asset-71538864872aa7a87a1077a9a2815202c00a2f-20240926225858-m4ciqir.png" alt=""  data-is-external-image="true"></figure><p>大概意思就是使用称为B-Tree（具体为B+Tree）的数据结构在内存中维护表的数据，这直接说明了具体的数据结构应该为B+树，只不过B+树是B树的一种变形而已。</p><h3 id="mongodb大数据量分页怎么做？">MongoDB大数据量分页怎么做？</h3>
+<p>答：<strong>B+树</strong></p><p>这个问题国内论坛真的是难以找到靠谱的答案，大部分给出的都是不准确的B树，当然B+树确实是B树的一种，但是准确的说当前版本MongoDB底层实现应该是B+树才是准确的。</p><p>下面来给出具体的说明：</p><p>我们知道MongoDB当下支持两种引擎，一个是默认的WiredTiger，另一个是In-Memory，In-Memory是保存在内存中，我们平时讨论和使用的是默认的WiredTiger（本讨论从MongoDB3.2将WiredTiger作为默认引擎的前提下展开，至于老版本的数据结构这里忽略掉）。</p><p>WiredTiger文档中有这么一句话：</p><figure class="post__image"><img loading="lazy" src="https://jobslee0.github.io/media/posts/9/71538864872aa7a87a1077a9a2815202c00a2f.webp" alt="Image description" width="2864" height="1108"  sizes="(min-width: 920px) 703px, (min-width: 700px) calc(82vw - 35px), calc(100vw - 81px)" srcset="https://jobslee0.github.io/media/posts/9/responsive/71538864872aa7a87a1077a9a2815202c00a2f-xs.webp 300w ,https://jobslee0.github.io/media/posts/9/responsive/71538864872aa7a87a1077a9a2815202c00a2f-sm.webp 480w ,https://jobslee0.github.io/media/posts/9/responsive/71538864872aa7a87a1077a9a2815202c00a2f-md.webp 768w ,https://jobslee0.github.io/media/posts/9/responsive/71538864872aa7a87a1077a9a2815202c00a2f-lg.webp 1024w"></figure><p>大概意思就是使用称为B-Tree（具体为B+Tree）的数据结构在内存中维护表的数据，这直接说明了具体的数据结构应该为B+树，只不过B+树是B树的一种变形而已。</p><h3 id="mongodb大数据量分页怎么做？">MongoDB大数据量分页怎么做？</h3>
 <ol>
 <li>count语法会导致全局扫表，<strong>不建议使用count做页码总数的统计</strong>；</li>
 <li>对于不带条件的全局数据统计，<strong>建议使用estimatedDocumentCount</strong>；</li>
@@ -1540,7 +1540,7 @@ assert gs == &#39;Name: Lucy&#39;               (10)
         </content>
     </entry>
     <entry>
-        <title>关于</title>
+        <title>🏠 关于本站</title>
         <author>
             <name>Jobs.Lee</name>
         </author>
@@ -1550,13 +1550,12 @@ assert gs == &#39;Name: Lucy&#39;               (10)
         <updated>2019-01-25T19:09:00+08:00</updated>
             <summary>
                 <![CDATA[
-                    🏠 关于本站 温故而知新。 偶尔或者经常来记录在技术路上的点点滴滴，当然还会有一些爱好和生活的碎碎念。 一个好的开发者是需要长时间的学习、坚持和积淀的，而思考和总结则是不断前行的不二法门。工作已有数年，深知记录、思考和总结的重要性，却迟迟未有践行。 摒除浮躁，愿以此为契机，在此桃源之地，更加鞭策自己，不断进步！
+                    温故而知新。 偶尔或者经常来记录在技术路上的点点滴滴，当然还会有一些爱好分享和生活碎碎念。 一个好的开发者是需要长时间的学习、坚持和积淀的，而思考和总结则是不断前行的不二法门。工作已有数年，深知记录、思考和总结的重要性，却迟迟未有践行。 摒除浮躁，愿以此为契机，在此桃源之地，更加鞭策自己，不断进步！
                 ]]>
             </summary>
         <content type="html">
             <![CDATA[
-                <h2 id="🏠-关于本站">🏠 关于本站</h2>
-<p>温故而知新。</p><p>偶尔或者经常来记录在技术路上的点点滴滴，当然还会有一些爱好和生活的碎碎念。</p><p>一个好的开发者是需要长时间的学习、坚持和积淀的，而思考和总结则是不断前行的不二法门。工作已有数年，深知记录、思考和总结的重要性，却迟迟未有践行。</p><p>摒除浮躁，愿以此为契机，在此桃源之地，更加鞭策自己，不断进步！</p>
+                <p>温故而知新。</p><p>偶尔或者经常来记录在技术路上的点点滴滴，当然还会有一些爱好分享和生活碎碎念。</p><p>一个好的开发者是需要长时间的学习、坚持和积淀的，而思考和总结则是不断前行的不二法门。工作已有数年，深知记录、思考和总结的重要性，却迟迟未有践行。</p><p>摒除浮躁，愿以此为契机，在此桃源之地，更加鞭策自己，不断进步！</p>
             ]]>
         </content>
     </entry>
