@@ -3,7 +3,7 @@
     <title>Z.H.</title>
     <link href="https://jobslee0.github.io/feed.xml" rel="self" />
     <link href="https://jobslee0.github.io" />
-    <updated>2024-09-27T20:40:46+08:00</updated>
+    <updated>2024-09-27T20:53:34+08:00</updated>
     <author>
         <name>Jobs.Lee</name>
     </author>
@@ -326,12 +326,13 @@ public class DirectMemoryExample {
         <updated>2023-01-09T15:45:00+08:00</updated>
             <summary>
                 <![CDATA[
-                    Groovy 语言提出了几种在运行时将自身集成到应用程序（Java 甚至 Groovy）中的方法，从最基本的简单代码执行到最完整的集成缓存和编译器定制。 这个groovy.util.Eval类是最简单的方式在运行时动态的执行Groovy。可以使用me方法： import&hellip;
+                    Groovy是一门基于JVM的语言，堪称动态语言版Java，其各种动态语言特性填补了Java的各种空缺，让人拍案叫绝……有幸接触Groovy，遂手动翻译三篇官方文档，以便于读者从Java到Groovy的快速迁移。 Groovy 语言提出了几种在运行时将自身集成到应用程序（Java 甚至 Groovy）中的方法，从最基本的简单代码执行到最完整的集成缓存和编译器定制。 这个groovy.util.Eval类是最简单的方式在运行时动态的执行Groovy。可以使用me方法：&hellip;
                 ]]>
             </summary>
         <content type="html">
             <![CDATA[
-                <p>Groovy 语言提出了几种在运行时将自身集成到应用程序（Java 甚至 Groovy）中的方法，从最基本的简单代码执行到最完整的集成缓存和编译器定制。</p><table>
+                <p>Groovy是一门基于JVM的语言，堪称动态语言版Java，其各种动态语言特性填补了Java的各种空缺，让人拍案叫绝……有幸接触Groovy，遂手动翻译三篇官方文档，以便于读者从Java到Groovy的快速迁移。</p><hr>
+<p>Groovy 语言提出了几种在运行时将自身集成到应用程序（Java 甚至 Groovy）中的方法，从最基本的简单代码执行到最完整的集成缓存和编译器定制。</p><table>
 <thead>
 <tr>
 <th><br /></th>
@@ -739,7 +740,8 @@ def engine = new GroovyScriptEngine([tmpDir.toURI().toURL()] as URL[])          
 }
 </code></pre>
 <p>你应该观察到依赖文件已重新加载：</p><p>Hello, dependency 1!…Hello, dependency 2!Hello, dependency 2!</p><h3 id="15-compilationunit">1.5. CompilationUnit</h3>
-<p>最终，通过直接依赖<code>org.codehaus.groovy.control.CompilationUnit</code>类，可以在编译期间执行更多操作。该类负责确定编译的各个步骤，并允许你引入新步骤，甚至在各个阶段停止编译。例如，对于联合编译器，存根生成是如何完成的。</p><p>但是，不建议覆盖<code>CompilationUnit</code>，只有在没有其他标准解决方案有效的情况下才应该这样做。</p>
+<p>最终，通过直接依赖<code>org.codehaus.groovy.control.CompilationUnit</code>类，可以在编译期间执行更多操作。该类负责确定编译的各个步骤，并允许你引入新步骤，甚至在各个阶段停止编译。例如，对于联合编译器，存根生成是如何完成的。</p><p>但是，不建议覆盖<code>CompilationUnit</code>，只有在没有其他标准解决方案有效的情况下才应该这样做。</p><hr>
+<p>🔗 原文链接： <a href="https://groovy-lang.org/integrating.html">https://groovy-lang.org/integrating…</a></p>
             ]]>
         </content>
     </entry>
@@ -757,12 +759,13 @@ def engine = new GroovyScriptEngine([tmpDir.toURI().toURL()] as URL[])          
         <updated>2023-01-09T15:45:00+08:00</updated>
             <summary>
                 <![CDATA[
-                    一个踏上了Groovy冒险之旅的Java开发者，会先基于烂熟于心的Java，然后再逐步的学习Groovy，一次一个特性的，最后将能够有效、习惯的使用Groovy编写代码。 这个文档旨在给在这条路上的开发者一个指导，传授一些常用的Groovy语法格式、新的操作和新的特性，譬如闭包等。这个指导文档不是完善的，仅仅作为一个进阶的快速介绍和基础指南，你可以对文档进行贡献和改进。 当你是C / C++ /&hellip;
+                    Groovy是一门基于JVM的语言，堪称动态语言版Java，其各种动态语言特性填补了Java的各种空缺，让人拍案叫绝……有幸接触Groovy，遂手动翻译三篇官方文档，以便于读者从Java到Groovy的快速迁移。 一个踏上了Groovy冒险之旅的Java开发者，会先基于烂熟于心的Java，然后再逐步的学习Groovy，一次一个特性的，最后将能够有效、习惯的使用Groovy编写代码。 这个文档旨在给在这条路上的开发者一个指导，传授一些常用的Groovy语法格式、新的操作和新的特性，譬如闭包等。这个指导文档不是完善的，仅仅作为一个进阶的快速介绍和基础指南，你可以对文档进行贡献和改进。 当你是C / C++&hellip;
                 ]]>
             </summary>
         <content type="html">
             <![CDATA[
-                <p>一个踏上了Groovy冒险之旅的Java开发者，会先基于烂熟于心的Java，然后再逐步的学习Groovy，一次一个特性的，最后将能够有效、习惯的使用Groovy编写代码。 这个文档旨在给在这条路上的开发者一个指导，传授一些常用的Groovy语法格式、新的操作和新的特性，譬如闭包等。这个指导文档不是完善的，仅仅作为一个进阶的快速介绍和基础指南，你可以对文档进行贡献和改进。</p><h2 id="1-无分号">1. 无分号</h2>
+                <p>Groovy是一门基于JVM的语言，堪称动态语言版Java，其各种动态语言特性填补了Java的各种空缺，让人拍案叫绝……有幸接触Groovy，遂手动翻译三篇官方文档，以便于读者从Java到Groovy的快速迁移。</p><hr>
+<p>一个踏上了Groovy冒险之旅的Java开发者，会先基于烂熟于心的Java，然后再逐步的学习Groovy，一次一个特性的，最后将能够有效、习惯的使用Groovy编写代码。 这个文档旨在给在这条路上的开发者一个指导，传授一些常用的Groovy语法格式、新的操作和新的特性，譬如闭包等。这个指导文档不是完善的，仅仅作为一个进阶的快速介绍和基础指南，你可以对文档进行贡献和改进。</p><h2 id="1-无分号">1. 无分号</h2>
 <p>当你是C / C++ / C# / Java背景的程序员时，已经习惯了处处使用分号。糟糕的是，Groovy支持了99%的Java语法，有时候复制Java代码到Groovy程序是十分容易的，这样就导致了分号大量的出现。可是，分号在Groovy里是可选的，你可以忽略它们，甚至于习惯移除它们。</p><h2 id="2-可选的return关键字">2. 可选的Return关键字</h2>
 <p>在Groovy中，方法体最后一行的表达式能够被返回而无需<code>return</code>关键字。尤其是在闭包的短方法中，忽略关键字使它看起来更优雅：</p><pre><code class="language-Groovy">String toString() { return &quot;a server&quot; }
 String toString() { &quot;a server&quot; }
@@ -972,7 +975,71 @@ switch (x) {
 assert result == &quot;number&quot;
 </code></pre>
 <p>更进一步来讲，带有 <code>isCase()</code> 方法的类型也可以决定一个值是否与一个case相对应。</p><h2 id="15-import别名">15. Import别名</h2>
-<p>在Java中，当你使用两个不同包但同名的类时，譬如<code>java.util.List</code>和<code>java.awt.List</code>，你只能导入一个类，然后不得不通过使用完全限定名来使用另外一个类。</p><p>有时候在代码中，多个长类名的调用可能显得代码冗长且降低了代码的清晰度。</p><p>为了改善这些场景，Groovy提供了导入别名的特性：</p>
+<p>在Java中，当你使用两个不同包但同名的类时，譬如<code>java.util.List</code>和<code>java.awt.List</code>，你只能导入一个类，然后不得不通过使用完全限定名来使用另外一个类。</p><p>有时候在代码中，多个长类名的调用可能显得代码冗长且降低了代码的清晰度。</p><p>为了改善这些场景，Groovy提供了导入别名的特性：</p><pre><code class="language-Groovy">import java.util.List as UtilList
+import java.awt.List as AwtList
+import javax.swing.WindowConstants as WC
+
+UtilList list1 = [WC.EXIT_ON_CLOSE]
+assert list1.size() instanceof Integer
+def list2 = new AwtList()
+assert list2.size() instanceof java.awt.Dimension
+</code></pre>
+<p>你也可以在导入静态方法时使用别名：</p><pre><code class="language-Groovy">import static java.lang.Math.abs as mabs
+assert mabs(-4) == 4
+</code></pre>
+<h2 id="16-groovy的真值">16. Groovy的真值</h2>
+<p>所有的对象都可以被强转为boolean值：所有的可能值为<code>null</code> , <code>void</code> , 等于0或者空则为<code>false</code> , 否则为<code>true</code>。</p><p>替代下面的写法：</p><pre><code class="language-Groovy">if (name != null &amp;&amp; name.length &gt; 0) {}
+</code></pre>
+<p>你可以仅仅这样做：</p><pre><code class="language-Groovy">if (name) {}
+</code></pre>
+<p>集合也是如此。</p><p>因此你可以在<code>while()</code> , <code>if()</code> , 三元运算符, Elvis表达式等里面使用一些简短的表达。</p><p>甚至于，通过在你的类中添加一个boolean类型的<code>asBoolean()</code>方法，去自定义Groovy的真值！</p><h2 id="17-安全视图导航">17. 安全视图导航</h2>
+<p>Groovy支持对象<code>.</code>操作的安全变体。</p><p>在Java中，当你对对象中一个子字段感兴趣，必须通过校验<code>null</code>来避免空指针，最后不得不便携复杂的<code>if</code>或者<code>if</code>嵌套：</p><pre><code class="language-Groovy">if (order != null) {
+    if (order.getCustomer() != null) {
+        if (order.getCustomer().getAddress() != null) {
+            System.out.println(order.getCustomer().getAddress());
+        }
+    }
+}
+</code></pre>
+<p>通过<code>?.</code>来安全的访问子对象，你可以像如下一样简化代码：</p><pre><code class="language-Groovy">println order?.customer?.address
+</code></pre>
+<p>在调用链中，空指针将被校验，如果有任何元素为<code>null</code>将不会有<code>NullPointerException</code>异常抛出。如果有某个元素为<code>null</code>，则结果返回为<code>null</code>。</p><h2 id="18-assert断言">18. Assert断言</h2>
+<p>你可以使用<code>assert</code>语句来校验你的参数、返回值或者更多场景。</p><p>跟Java的<code>assert</code>相反，<code>assert</code>不需要被激活便能够被使用，所以<code>assert</code>总是可以被检查的。</p><pre><code class="language-Groovy">def check(String name) {
+    // name non-null and non-empty according to Groovy Truth
+    assert name
+    // safe navigation + Groovy Truth to check
+    assert name?.size() &gt; 3
+}
+</code></pre>
+<p>你还会注意到 Groovy 的“Power Assert”语句提供的良好输出，其中包含每个被断言的子表达式的各种值的图形视图。</p><h2 id="19-使用elvis表达式处理默认值">19. 使用Elvis表达式处理默认值</h2>
+<p>Elvis是一个用来处理默认值的简短的三元表达式。</p><p>我们通常这样写代码：</p><pre><code class="language-Groovy">def result = name != null ? name : &quot;Unknown&quot;
+</code></pre>
+<p>真心感谢Groovy，<code>null</code>的检查可以简短到只有’name’。</p><p>更进一步，既然你无论如何都返回 ‘name’，而不是在这个三元表达式中重复name两次，我们可以通过使用Elvis运算符以某种方式删除问号和冒号之间的内容，这样上面就变成了：</p><pre><code class="language-Groovy">def result = name ?: &quot;Unknown&quot;
+</code></pre>
+<h2 id="20-catch任何的异常">20. Catch任何的异常</h2>
+<p>如果你不是真的很在意代码<code>try</code>块中的异常的类型，你可以简单地捕获它们中的任何一个并简单地省略捕获的异常的类型。所以替代下面的代码：</p><pre><code class="language-Groovy">try {
+    // ...
+} catch (Exception t) {
+    // something bad happens
+}
+</code></pre>
+<p>使用catch (‘any’ 或者 ‘all’, 或者你认为的任何异常)：</p><pre><code class="language-Groovy">try {
+    // ...
+} catch (any) {
+    // something bad happens
+}
+</code></pre>
+<table>
+<thead>
+<tr>
+<th><br /></th>
+<th>请注意，它捕获所有异常，而不是 <code>Throwable</code>。如果你需要真正捕捉“所有东西”，你必须明确地说你想捕捉 <code>Throwable</code>。</th>
+</tr>
+</thead>
+</table>
+<h2 id="21-对可选类型的建议">21. 对可选类型的建议</h2>
+<p>我将完成一些关于怎么用和什么时候用可选类型的内容。Groovy让你决定是否去使用强类型还是<code>def</code>。</p><p>我有一个相当简单的经验法则：每当你的代码被当作公有API使用时，你应该总是青睐使用强类型，这将帮助你确定更健壮的约束，以避免可能通过错误的参数类型，也能够提供更好的文档，还能帮助IDE去进行代码补全。每当代码仅供你自己使用时，像私有方法，或者当IDE可以轻易推断类型时，你就可以更自由地决定何时使用可选类型。</p><hr>
+<p>🔗 原文链接： <a href="https://groovy-lang.org/style-guide.html">https://groovy-lang.org/style-guide…</a></p>
             ]]>
         </content>
     </entry>
@@ -990,12 +1057,13 @@ assert result == &quot;number&quot;
         <updated>2023-01-09T15:45:00+08:00</updated>
             <summary>
                 <![CDATA[
-                    闭包 本章节主要讲解Groovy的闭包。Groovy中的闭包是一个开放、匿名、可以携带参数的代码块，同时可以返回一个指定变量的值。一个闭包可以引用在它周围声明的变量。与闭包的正式定义相反的，Closure在Groovy语言中还可以包含在其周围范围之外定义的自由变量。虽然打破了闭包的正式概念，但它提供了本章中描述的各种优点。 一个闭包的定义遵循以下语法： { [closureParameters -&gt;&hellip;
+                    Groovy是一门基于JVM的语言，堪称动态语言版Java，其各种动态语言特性填补了Java的各种空缺，让人拍案叫绝……有幸接触Groovy，遂手动翻译三篇官方文档，以便于读者从Java到Groovy的快速迁移。 本章节主要讲解Groovy的闭包。Groovy中的闭包是一个开放、匿名、可以携带参数的代码块，同时可以返回一个指定变量的值。一个闭包可以引用在它周围声明的变量。与闭包的正式定义相反的，Closure在Groovy语言中还可以包含在其周围范围之外定义的自由变量。虽然打破了闭包的正式概念，但它提供了本章中描述的各种优点。 一个闭包的定义遵循以下语法： { [closureParameters -&gt;&hellip;
                 ]]>
             </summary>
         <content type="html">
             <![CDATA[
-                <h1 id="闭包">闭包</h1>
+                <p>Groovy是一门基于JVM的语言，堪称动态语言版Java，其各种动态语言特性填补了Java的各种空缺，让人拍案叫绝……有幸接触Groovy，遂手动翻译三篇官方文档，以便于读者从Java到Groovy的快速迁移。</p><hr>
+<h1 id="闭包">闭包</h1>
 <p>  本章节主要讲解Groovy的闭包。Groovy中的闭包是一个开放、匿名、可以携带参数的代码块，同时可以返回一个指定变量的值。一个闭包可以引用在它周围声明的变量。与闭包的正式定义相反的，<code>Closure</code>在Groovy语言中还可以包含在其周围范围之外定义的自由变量。虽然打破了闭包的正式概念，但它提供了本章中描述的各种优点。</p><h2 id="1-语法">1. 语法</h2>
 <h3 id="11-定义一个闭包">1.1. 定义一个闭包</h3>
 <p>一个闭包的定义遵循以下语法：</p><pre><code class="language-Groovy">{ [closureParameters -&gt; ] statements }
@@ -1529,7 +1597,197 @@ assert gs == &#39;Name: Sam&#39;                (8)
 sam.name = &#39;Lucy&#39;                       (9)
 assert gs == &#39;Name: Lucy&#39;               (10)
 </code></pre>
-
+<table>
+<thead>
+<tr>
+<th><strong>1</strong></th>
+<th><code>Person</code>类有一个<code>toString</code>方法返回<code>name</code>属性</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>2</strong></td>
+<td>我们创建了一个名为<em>Sam</em>的<code>Person</code></td>
+</tr>
+<tr>
+<td><strong>3</strong></td>
+<td>我们创建另一个名为<em>Lucy</em>的<code>Person</code></td>
+</tr>
+<tr>
+<td><strong>4</strong></td>
+<td><code>p</code>变量设置为<code>Sam</code></td>
+</tr>
+<tr>
+<td><strong>5</strong></td>
+<td>并创建一个闭包，引用<code>p</code>的值，也就是说<em>Sam</em></td>
+</tr>
+<tr>
+<td><strong>6</strong></td>
+<td>所以当我们评估字符串时，它会返回<em>Sam</em></td>
+</tr>
+<tr>
+<td><strong>7</strong></td>
+<td>如果我们将<code>p</code>更改为<em>Lucy</em></td>
+</tr>
+<tr>
+<td><strong>8</strong></td>
+<td>该字符串仍然计算为<em>Sam</em>，因为它是创建<code>GString</code>时<code>p</code>的<strong>值</strong></td>
+</tr>
+<tr>
+<td><strong>9</strong></td>
+<td>所以如果我们把name的值<em>Sam</em>改成<em>Lucy</em></td>
+</tr>
+<tr>
+<td><strong>10</strong></td>
+<td>这次<code>GString</code>被正确地改变了</td>
+</tr>
+</tbody></table>
+<p>因此，如果你不想依赖变异对象或包装对象，则<strong>必须</strong>通过显式声明一个空参数列表来在<code>GString</code>中使用闭包：</p><pre><code class="language-Groovy">class Person {
+    String name
+    String toString() { name }
+}
+def sam = new Person(name:&#39;Sam&#39;)
+def lucy = new Person(name:&#39;Lucy&#39;)
+def p = sam
+// Create a GString with lazy evaluation of &quot;p&quot;
+def gs = &quot;Name: ${-&gt; p}&quot;
+assert gs == &#39;Name: Sam&#39;
+p = lucy
+assert gs == &#39;Name: Lucy&#39;
+</code></pre>
+<h2 id="5-强制闭包">5. 强制闭包</h2>
+<p>闭包可以转换为接口或单抽象方法类型。有关完整说明，请参阅<a href="https://docs.groovy-lang.org/latest/html/documentation/core-semantics.html#closure-coercion">手册的这一部分</a>。</p><h2 id="6-函数式编程">6. 函数式编程</h2>
+<p>闭包，如<a href="https://docs.oracle.com/javase/tutorial/java/javaOO/lambdaexpressions.html">Java 8中的lambda表达式</a>，是Groovy中函数式编程范式的核心。函数的一些函数式编程操作可以直接在<code>Closure</code>类上使用，如本节所示。</p><h3 id="61-柯里化">6.1. 柯里化</h3>
+<p>在Groovy中，柯里化是指部分应用的概念。由于Groovy在闭包上应用的不同作用域规则，它<strong>不符合</strong>函数式编程中柯里化的真正概念。 Groovy中的柯里化将允许你设置闭包的一个参数的值，并且它将返回一个接受少一个参数的新闭包。</p><h4 id="611-左柯里化">6.1.1. 左柯里化</h4>
+<p>左柯里化是设置闭包最左边的参数，如下例所示：</p><pre><code class="language-Groovy">def nCopies = { int n, String str -&gt; str*n }    (1)
+def twice = nCopies.curry(2)                    (2)
+assert twice(&#39;bla&#39;) == &#39;blabla&#39;                 (3)
+assert twice(&#39;bla&#39;) == nCopies(2, &#39;bla&#39;)        (4)
+</code></pre>
+<table>
+<thead>
+<tr>
+<th><strong>1</strong></th>
+<th><code>nCopies</code>闭包定义了两个参数</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>2</strong></td>
+<td><code>curry</code>将第一个参数设置为 2 ，创建一个接受单个<code>String</code>的新闭包（函数）</td>
+</tr>
+<tr>
+<td><strong>3</strong></td>
+<td>所以只用一个<code>String</code>调用新的函数调用</td>
+</tr>
+<tr>
+<td><strong>4</strong></td>
+<td>并且相当于用两个参数调用<code>nCopies</code></td>
+</tr>
+</tbody></table>
+<h4 id="612-右柯里化">6.1.2. 右柯里化</h4>
+<p>与左柯里化类似，可以设置闭包的最右侧参数：</p><pre><code class="language-Groovy">def nCopies = { int n, String str -&gt; str*n }    (1)
+def blah = nCopies.rcurry(&#39;bla&#39;)                (2)
+assert blah(2) == &#39;blabla&#39;                      (3)
+assert blah(2) == nCopies(2, &#39;bla&#39;)             (4)
+</code></pre>
+<table>
+<thead>
+<tr>
+<th><strong>1</strong></th>
+<th><code>nCopies</code>闭包定义了两个参数</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>2</strong></td>
+<td><code>rcurry</code>会将最后一个参数设置为<code>bla</code>，创建一个接受单个<code>int</code>的新闭包（函数）</td>
+</tr>
+<tr>
+<td><strong>3</strong></td>
+<td>所以只用一个<code>int</code>调用新的函数调用</td>
+</tr>
+<tr>
+<td><strong>4</strong></td>
+<td>并且相当于用两个参数调用<code>nCopies</code></td>
+</tr>
+</tbody></table>
+<h4 id="613-基于索引的柯里化">6.1.3. 基于索引的柯里化</h4>
+<p>如果闭包接受超过 2 个参数，则可以使用<code>ncurry</code>设置任意参数：</p><pre><code class="language-Groovy">def volume = { double l, double w, double h -&gt; l*w*h }      (1)
+def fixedWidthVolume = volume.ncurry(1, 2d)                 (2)
+assert volume(3d, 2d, 4d) == fixedWidthVolume(3d, 4d)       (3)
+def fixedWidthAndHeight = volume.ncurry(1, 2d, 4d)          (4)
+assert volume(3d, 2d, 4d) == fixedWidthAndHeight(3d)        (5)
+</code></pre>
+<table>
+<thead>
+<tr>
+<th><strong>1</strong></th>
+<th><code>volume</code>函数定义了3个参数</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>2</strong></td>
+<td><code>ncurry</code>将第二个参数 (index = 1) 设置为<code>2d</code>，创建一个接受长度和高度的新体积函数</td>
+</tr>
+<tr>
+<td><strong>3</strong></td>
+<td>该功能相当于调用<code>volume</code>省略宽度</td>
+</tr>
+<tr>
+<td><strong>4</strong></td>
+<td>也可以设置多个参数，从指定的索引开始</td>
+</tr>
+<tr>
+<td><strong>5</strong></td>
+<td>结果函数接受与初始参数一样多的参数减去<code>ncurry</code>设置的参数数量</td>
+</tr>
+</tbody></table>
+<h3 id="62-记忆">6.2. 记忆</h3>
+<p>记忆化允许缓存调用闭包的结果。如果一个函数（闭包）完成的计算很慢，这很有趣，但你知道这个函数会经常用相同的参数调用。一个典型的例子是斐波那契套件。一个简单的实现可能如下所示：</p><pre><code class="language-Groovy">def fib
+fib = { long n -&gt; n&lt;2?n:fib(n-1)+fib(n-2) }
+assert fib(15) == 610 // slow!
+</code></pre>
+<p>这是一个幼稚的实现，因为“fib”通常使用相同的参数递归调用，从而导致指数算法：</p><ul>
+<li>计算<code>fib(15)</code>需要<code>fib(14)</code>和<code>fib(13)</code>的结果</li>
+<li>计算<code>fib(14)</code>需要<code>fib(13)</code>和<code>fib(12)</code>的结果</li>
+</ul>
+<p>由于调用是递归的，你已经可以看到我们将一次又一次地计算相同的值，尽管它们可以被缓存。这个幼稚的实现可以通过使用<code>memoize</code>缓存调用结果来“修复”：</p><pre><code class="language-Groovy">fib = { long n -&gt; n&lt;2?n:fib(n-1)+fib(n-2) }.memoize()
+assert fib(25) == 75025 // fast!
+</code></pre>
+<table>
+<thead>
+<tr>
+<th><br /></th>
+<th>缓存<strong>使用参数的实际值</strong>工作。这意味着，如果你将memoization与原始类型或盒装原始类型以外的其他内容一起使用，你应该非常小心。</th>
+</tr>
+</thead>
+</table>
+<p>可以使用其他方法调整缓存的行为：</p><ul>
+<li><code>memoizeAtMost</code>将生成一个新的闭包，<strong>最多</strong>缓存n个值</li>
+<li><code>memoizeAtLeast</code>将生成一个缓存<strong>至少</strong>n个值的新闭包</li>
+<li><code>memoizeBetween</code>将生成一个新的闭包，它缓存<strong>至少</strong>n个值和<strong>最多</strong>n个值</li>
+</ul>
+<p>所有memoize变体中使用的缓存都是LRU缓存。</p><h3 id="63-组合">6.3. 组合</h3>
+<p>闭包组合对应于函数组合的概念，即通过组合两个或多个函数（链式调用）来创建一个新函数，如下例所示：</p><pre><code class="language-Groovy">def plus2  = { it + 2 }
+def times3 = { it * 3 }def times3plus2 = plus2 &lt;&lt; times3
+assert times3plus2(3) == 11
+assert times3plus2(4) == plus2(times3(4))def plus2times3 = times3 &lt;&lt; plus2
+assert plus2times3(3) == 15
+assert plus2times3(5) == times3(plus2(5))// reverse composition
+assert times3plus2(3) == (times3 &gt;&gt; plus2)(3)
+</code></pre>
+<h3 id="64-蹦床trampoline">6.4. 蹦床Trampoline</h3>
+<p>递归算法通常受到物理限制的限制：最大堆栈高度。例如，如果你调用一个递归调用自身太深的方法，你最终会收到一个<code>StackOverflowException</code>。</p><p>在这些情况下有帮助的一种方法是使用<code>Closure</code>及其trampoline功能。</p><p>闭包被包裹在<code>TrampolineClosure</code>中。调用时，蹦床<code>Closure</code>将调用原始<code>Closure</code>等待其结果。如果调用的结果是<code>TrampolineClosure</code>的另一个实例，可能是作为调用<code>trampoline()</code>方法的结果而创建的，则将再次调用<code>Closure</code>。返回的蹦床闭包实例的这种重复调用将继续，直到返回蹦床<code>Closure</code>以外的值。该值将成为蹦床的最终结果。这样，调用是连续进行的，而不是填充堆栈。</p><p>下面是使用<code>trampoline()</code>实现阶乘函数的示例：</p><pre><code class="language-Groovy">def factorial
+factorial = { int n, def accu = 1G -&gt;
+    if (n &lt; 2) return accu
+    factorial.trampoline(n - 1, n * accu)
+}
+factorial = factorial.trampoline()
+assert factorial(1)    == 1
+assert factorial(3)    == 1 * 2 * 3
+assert factorial(1000) // == 402387260.. plus another 2560 digits
+</code></pre>
+<h3 id="65-方法指针">6.5. 方法指针</h3>
+<p>能够使用常规方法作为闭包通常很实用。例如，你可能想要使用闭包的柯里化功能，但这些功能不适用于普通方法。在 Groovy 中，你可以使用<a href="https://docs.groovy-lang.org/latest/html/documentation/core-operators.html#method-pointer-operator">方法指针运算符</a>从任何方法中获取闭包。</p><hr>
+<p>🔗 原文链接： <a href="https://groovy-lang.org/closures.html">https://groovy-lang.org/closures.ht…</a></p>
             ]]>
         </content>
     </entry>
