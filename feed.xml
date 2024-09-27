@@ -3,12 +3,71 @@
     <title>Z.H.</title>
     <link href="https://jobslee0.github.io/feed.xml" rel="self" />
     <link href="https://jobslee0.github.io" />
-    <updated>2024-09-26T23:55:29+08:00</updated>
+    <updated>2024-09-27T20:40:46+08:00</updated>
     <author>
         <name>Jobs.Lee</name>
     </author>
     <id>https://jobslee0.github.io</id>
 
+    <entry>
+        <title>【翻译】Spring AI-人工智能概念</title>
+        <author>
+            <name>Jobs.Lee</name>
+        </author>
+        <link href="https://jobslee0.github.io/fan-yi-spring-ai-ren-gong-zhi-neng-gai-nian.html"/>
+        <id>https://jobslee0.github.io/fan-yi-spring-ai-ren-gong-zhi-neng-gai-nian.html</id>
+            <category term="翻译"/>
+            <category term="Spring AI"/>
+            <category term="Spring"/>
+            <category term="AI"/>
+
+        <updated>2024-09-27T20:38:27+08:00</updated>
+            <summary>
+                <![CDATA[
+                    译者之言 Spring真的是紧跟潮流，去年的这个时候还在看LangChain的文档，幻想着Java生态下的框架何时出现，现如今Spring AI已经诞生。从AI应用角度来看，各种模型接口适配其实是其次的，核心还是人工智能的概念，此部分概念对比LangChain有一种子集既视感，当然也是Spring自己提炼而来。因此专门翻译此文，以为日后作为入门之参考，相信在Java的生态下AI应用会越来越好！ 本节描述了 Spring AI&hellip;
+                ]]>
+            </summary>
+        <content type="html">
+            <![CDATA[
+                <h2 id="译者之言">译者之言</h2>
+<p>Spring真的是紧跟潮流，去年的这个时候还在看LangChain的文档，幻想着Java生态下的框架何时出现，现如今Spring AI已经诞生。从AI应用角度来看，各种模型接口适配其实是其次的，核心还是人工智能的概念，此部分概念对比LangChain有一种子集既视感，当然也是Spring自己提炼而来。因此专门翻译此文，以为日后作为入门之参考，相信在Java的生态下AI应用会越来越好！</p><hr>
+<p>本节描述了 Spring AI 使用的核心概念。我们建议仔细阅读，以理解 Spring AI 实现背后的思想。</p><h2 id="models-模型">Models 模型</h2>
+<p>AI 模型是旨在处理和生成信息的算法，通常模仿人类的认知功能。通过从大型数据集中学习模式和洞察，这些模型可以进行预测、生成文本、图像或其他输出，增强各行业的各种应用。</p><p>有许多不同类型的人工智能模型，每种模型都适用于特定的用例。虽然 ChatGPT 及其生成式人工智能能力通过文本输入和输出吸引了用户，但许多模型和公司提供多样化的输入和输出。在 ChatGPT 之前，许多人对文本生成图像的模型如 Midjourney 和 Stable Diffusion 感到着迷。</p><p>下表根据输入和输出类型对几种模型进行了分类：</p><figure class="post__image"><img loading="lazy" src="https://jobslee0.github.io/media/posts/11/1.jpg" alt="Image description" width="2472" height="1618"  sizes="(min-width: 920px) 703px, (min-width: 700px) calc(82vw - 35px), calc(100vw - 81px)" srcset="https://jobslee0.github.io/media/posts/11/responsive/1-xs.jpg 300w ,https://jobslee0.github.io/media/posts/11/responsive/1-sm.jpg 480w ,https://jobslee0.github.io/media/posts/11/responsive/1-md.jpg 768w ,https://jobslee0.github.io/media/posts/11/responsive/1-lg.jpg 1024w"></figure><p>Spring AI 目前支持处理语言、图像和音频的模型。前一个表格中的最后一行接受文本作为输入并输出数字，更常被称为 Embeddings 文本，代表了 AI 模型中使用的内部数据结构。Spring AI 支持 Embeddings ，以实现更高级的用例。</p><p>像 GPT 这样的模型之所以与众不同，是因为它们的预训练特性，这在 GPT 中由“P”表示——聊天生成预训练变换器。这个预训练特性使得人工智能成为一种通用开发工具，不需要广泛的机器学习或模型训练背景。</p><h2 id="prompts-提示">Prompts 提示</h2>
+<p>提示作为基于语言的输入的基础，指导 AI 模型生成特定的输出。对于熟悉 ChatGPT 的人来说，提示可能看起来只是输入到对话框中的文本，然后发送到 API。然而，它的涵盖范围远不止于此。在许多 AI 模型中，提示的文本不仅仅是一个简单的字符串。</p><p>ChatGPT 的 API 在一个提示中有多个文本输入，每个文本输入被分配一个角色。例如，有系统角色，它告诉模型如何表现并设置交互的上下文。还有用户角色，通常是用户的输入。</p><p>有效提示的制作既是一门艺术，也是一门科学。ChatGPT 是为人类对话而设计的。这与使用 SQL 等工具“提问”有很大不同。与 AI 模型的沟通必须像与另一个人交谈一样。</p><p>这种交互风格的重要性使得“提示工程”一词成为了一个独立的学科。现在有越来越多的技术可以提高提示的有效性。花时间精心设计提示可以显著改善最终的输出。</p><p>分享提示已成为一种共同的实践，并且在这个主题上正在进行积极的学术研究。作为创建有效提示的反直觉性的一个例子（例如，与 SQL 对比），一篇 <a href="https://arxiv.org/abs/2205.11916">最近的研究论文</a> 发现，您可以使用的最有效提示之一是以“深呼吸，逐步进行这一步。”这应该能让您明白语言是多么重要。我们尚未完全理解如何充分利用该技术的先前迭代，例如 ChatGPT 3.5，更不用说正在开发的新版本了。</p><h3 id="prompt-templates-提示模板">Prompt Templates 提示模板</h3>
+<p>创建有效的提示涉及建立请求的上下文，并用特定于用户输入的值替换请求的部分。</p><p>该过程使用传统的基于文本的模板引擎进行提示创建和管理。Spring AI 为此目的使用 OSS 库 <a href="https://www.stringtemplate.org/">StringTemplate</a>。</p><p>例如，考虑以下简单的提示模板：</p><p><code>Tell me a {adjective} joke about {content}.</code></p><p>在 Spring AI 中，提示模板可以比作 Spring MVC 架构中的“视图”。一个模型对象，通常是一个<code>java.util.Map</code>，用于填充模板中的占位符。“渲染”的字符串成为提供给 AI 模型的提示内容。</p><p>在发送给模型的提示的具体数据格式上存在相当大的变异性。最初以简单字符串开始，提示已经发展为包含多个消息，其中每条消息中的每个字符串代表模型的一个不同角色。</p><h2 id="embeddings">Embeddings</h2>
+<p>Embeddings 是文本、图像或视频的数值表示，捕捉输入之间的关系。</p><p>Embeddings 通过将文本、图像和视频转换为浮点数数组（称为向量）来工作。这些向量旨在捕捉文本、图像和视频的含义。 Embeddings 数组的长度称为向量的维度。</p><p>通过计算两段文本的向量表示之间的数值距离，应用程序可以确定生成 Embeddings 向量的对象之间的相似性。</p><figure class="post__image"><img loading="lazy" src="https://jobslee0.github.io/media/posts/11/2.jpg" alt="Image description" width="3518" height="1136"  sizes="(min-width: 920px) 703px, (min-width: 700px) calc(82vw - 35px), calc(100vw - 81px)" srcset="https://jobslee0.github.io/media/posts/11/responsive/2-xs.jpg 300w ,https://jobslee0.github.io/media/posts/11/responsive/2-sm.jpg 480w ,https://jobslee0.github.io/media/posts/11/responsive/2-md.jpg 768w ,https://jobslee0.github.io/media/posts/11/responsive/2-lg.jpg 1024w"></figure><p>作为一名探索人工智能的 Java 开发者，理解这些向量表示背后的复杂数学理论或具体实现并不是必要的。对它们在人工智能系统中角色和功能的基本理解就足够了，特别是在将人工智能功能集成到您的应用程序中时。</p><p>Embeddings 在实际应用中尤其相关，例如检索增强生成（RAG）模式。它们使数据能够作为语义空间中的点进行表示，这类似于欧几里得几何的二维空间，但在更高的维度中。这意味着，就像欧几里得几何中平面上的点可以根据其坐标的远近而接近或远离一样，在语义空间中，点的接近程度反映了意义上的相似性。关于相似主题的句子在这个多维空间中被放置得更近，就像图表上彼此靠近的点一样。这种接近性有助于文本分类、语义搜索甚至产品推荐等任务，因为它使人工智能能够根据这些扩展的语义空间中的“位置”来辨别和分组相关概念。</p><p>你可以把这个语义空间看作一个向量。</p><h2 id="tokens">Tokens</h2>
+<p>Tokens 作为 AI 模型工作原理的构建块。在输入时，模型将单词转换为 Tokens 。在输出时，它们将 Tokens 转换回单词。</p><p>在英语中，一个标记大约对应于一个单词的 75%。作为参考，莎士比亚的完整作品总计约 90 万个单词，翻译成大约 120 万个标记。</p><figure class="post__image"><img loading="lazy" src="https://jobslee0.github.io/media/posts/11/3.png" alt="Image description" width="1345" height="246"  sizes="(min-width: 920px) 703px, (min-width: 700px) calc(82vw - 35px), calc(100vw - 81px)" srcset="https://jobslee0.github.io/media/posts/11/responsive/3-xs.png 300w ,https://jobslee0.github.io/media/posts/11/responsive/3-sm.png 480w ,https://jobslee0.github.io/media/posts/11/responsive/3-md.png 768w ,https://jobslee0.github.io/media/posts/11/responsive/3-lg.png 1024w"></figure><p>也许更重要的是， Tokens = 费用。在托管的人工智能模型中，您的费用由使用的 Tokens 数量决定。输入和输出都对总 Tokens 数量有所贡献。</p><p>此外，模型受到 Tokens 限制，这限制了在单个 API 调用中处理的文本量。这个阈值通常被称为“上下文窗口”。模型不会处理超过此限制的任何文本。</p><p>例如，ChatGPT3 的 Tokens 限制为 4K，而 GPT4 提供了不同的选项，如 8K、16K 和 32K。Anthropic 的 Claude AI 模型具有 100K 的 Tokens 限制，Meta 最近的研究产生了一个 1M Tokens 限制的模型。</p><p>要总结莎士比亚的作品集与 GPT4，您需要制定软件工程策略来切分数据，并在模型的上下文窗口限制内呈现数据。Spring AI 项目可以帮助您完成此任务。</p><h2 id="structured-output-结构化输出">Structured Output 结构化输出</h2>
+<p>AI 模型的输出通常以<code>java.lang.String</code>的形式出现，即使你要求回复为 JSON。它可能是一个正确的 JSON，但它不是一个 JSON 数据结构。它只是一个字符串。此外，作为提示的一部分询问“要 JSON”并不是 100%准确的。</p><p>这种复杂性导致了一个专门领域的出现，涉及创建提示以产生预期的输出，然后将生成的简单字符串转换为可用于应用集成的数据结构。</p><figure class="post__image"><img loading="lazy" src="https://jobslee0.github.io/media/posts/11/4.jpg" alt="Image description" width="2809" height="1423"  sizes="(min-width: 920px) 703px, (min-width: 700px) calc(82vw - 35px), calc(100vw - 81px)" srcset="https://jobslee0.github.io/media/posts/11/responsive/4-xs.jpg 300w ,https://jobslee0.github.io/media/posts/11/responsive/4-sm.jpg 480w ,https://jobslee0.github.io/media/posts/11/responsive/4-md.jpg 768w ,https://jobslee0.github.io/media/posts/11/responsive/4-lg.jpg 1024w"></figure><p><a href="https://docs.spring.io/spring-ai/reference/api/structured-output-converter.html#_structuredoutputconverter">结构化输出转换</a>采用精心设计的提示，通常需要与模型进行多次交互以实现所需的格式。</p><h2 id="将您的数据和-api-带入-ai-模型">将您的数据和 API 带入 AI 模型</h2>
+<p>如何为未经过训练的 AI 模型提供信息？</p><p>请注意，GPT 3.5/4.0 数据集仅延续到 2021 年 9 月。因此，该模型表示它不知道超出该日期的问题的答案。有趣的是，这个数据集大约有 650GB。</p><p>有三种技术可以定制 AI 模型以融入您的数据：</p><ul>
+<li><p><strong>微调</strong>：这种传统的机器学习技术涉及调整模型并改变其内部权重。然而，对于机器学习专家来说，这是一个具有挑战性的过程，并且对于像 GPT 这样的模型来说，资源消耗极大，因为它们的规模。此外，一些模型可能不提供此选项。</p></li>
+<li><p><strong>提示填充</strong>：一种更实用的替代方案是将您的数据嵌入到提供给模型的提示中。考虑到模型的 Tokens 限制，需要采用技术在模型的上下文窗口内呈现相关数据。这种方法通常被称为“填充提示”。Spring AI 库帮助您实现基于“填充提示”技术的解决方案，也称为 <a href="https://docs.spring.io/spring-ai/reference/concepts.html#concept-rag">检索增强生成 (RAG)</a>。</p></li>
+</ul>
+<figure class="post__image"><img loading="lazy" src="https://jobslee0.github.io/media/posts/11/5.jpg" alt="Image description" width="3249" height="1230"  sizes="(min-width: 920px) 703px, (min-width: 700px) calc(82vw - 35px), calc(100vw - 81px)" srcset="https://jobslee0.github.io/media/posts/11/responsive/5-xs.jpg 300w ,https://jobslee0.github.io/media/posts/11/responsive/5-sm.jpg 480w ,https://jobslee0.github.io/media/posts/11/responsive/5-md.jpg 768w ,https://jobslee0.github.io/media/posts/11/responsive/5-lg.jpg 1024w"></figure><ul>
+<li><strong><a href="https://docs.spring.io/spring-ai/reference/concepts.html#concept-fc">函数调用</a></strong>：该技术允许注册自定义用户函数，将大型语言模型与外部系统的 API 连接起来。Spring AI 大大简化了您需要编写的支持<a href="https://docs.spring.io/spring-ai/reference/api/functions.html">函数调用</a>的代码。</li>
+</ul>
+<h3 id="retrieval-augmented-generation-检索增强生成">Retrieval Augmented Generation 检索增强生成</h3>
+<p>一种被称为检索增强生成（RAG）的技术已经出现，以解决将相关数据纳入提示以获得准确的 AI 模型响应的挑战。</p><p>该方法涉及一种批处理风格的编程模型，其中作业从您的文档中读取非结构化数据，对其进行转换，然后将其写入向量数据库。从高层次来看，这是一条 ETL（提取、转换和加载）管道。向量数据库用于 RAG 技术的检索部分。</p><p>作为将非结构化数据加载到向量数据库的一部分，最重要的转换之一是将原始文档拆分成更小的部分。将原始文档拆分成更小部分的过程有两个重要步骤：</p><ol>
+<li>将文档分成多个部分，同时保留内容的语义边界。例如，对于包含段落和表格的文档，应避免在段落或表格的中间拆分文档。对于代码，避免在方法实现的中间拆分代码。</li>
+<li>将文档的部分进一步拆分为大小为 AI 模型 Tokens 限制的小百分比的部分。</li>
+</ol>
+<p>RAG 的下一个阶段是处理用户输入。当用户的问题需要由 AI 模型回答时，该问题和所有“相似”的文档片段会被放入发送给 AI 模型的提示中。这就是使用向量数据库的原因。它非常擅长寻找相似内容。</p><figure class="post__image"><img loading="lazy" src="https://jobslee0.github.io/media/posts/11/6.jpg" alt="Image description" width="3360" height="1859"  sizes="(min-width: 920px) 703px, (min-width: 700px) calc(82vw - 35px), calc(100vw - 81px)" srcset="https://jobslee0.github.io/media/posts/11/responsive/6-xs.jpg 300w ,https://jobslee0.github.io/media/posts/11/responsive/6-sm.jpg 480w ,https://jobslee0.github.io/media/posts/11/responsive/6-md.jpg 768w ,https://jobslee0.github.io/media/posts/11/responsive/6-lg.jpg 1024w"></figure><ul>
+<li><a href="https://docs.spring.io/spring-ai/reference/api/etl-pipeline.html">ETL 管道</a>提供了有关协调从数据源提取数据并将其存储在结构化向量存储中的流程的更多信息，确保数据在传递给 AI 模型时处于最佳检索格式。</li>
+<li><a href="https://docs.spring.io/spring-ai/reference/api/chatclient.html#_retrieval_augmented_generation">聊天客户端 - RAG</a> 解释了如何使用 <code>问题回答顾问</code> 在您的应用程序中启用 RAG 功能。</li>
+</ul>
+<h3 id="function-calling-函数调用">Function Calling 函数调用</h3>
+<p>大型语言模型（LLMs）在训练后被冻结，导致知识陈旧，并且无法访问或修改外部数据。</p><p><a href="https://docs.spring.io/spring-ai/reference/api/functions.html">函数调用</a>机制解决了这些不足之处。它允许您注册自己的函数，将大型语言模型连接到外部系统的 API。这些系统可以为LLMs提供实时数据，并代表它们执行数据处理操作。</p><p>Spring AI 大大简化了您需要编写的代码，以支持函数调用。它为您处理函数调用的对话。您可以将您的函数作为一个 <code>@Bean</code> 提供，然后在提示选项中提供该函数的 bean 名称以激活该函数。此外，您可以在单个提示中定义和引用多个函数。</p><figure class="post__image"><img loading="lazy" src="https://jobslee0.github.io/media/posts/11/7.jpg" alt="Image description" width="3400" height="1838"  sizes="(min-width: 920px) 703px, (min-width: 700px) calc(82vw - 35px), calc(100vw - 81px)" srcset="https://jobslee0.github.io/media/posts/11/responsive/7-xs.jpg 300w ,https://jobslee0.github.io/media/posts/11/responsive/7-sm.jpg 480w ,https://jobslee0.github.io/media/posts/11/responsive/7-md.jpg 768w ,https://jobslee0.github.io/media/posts/11/responsive/7-lg.jpg 1024w"></figure><ol>
+<li>执行聊天请求，发送函数定义信息。后者提供了<code>名称</code>、<code>描述</code>（例如，解释模型何时应调用该函数）和<code>输入参数</code>（例如，函数的输入参数模式）。</li>
+<li>当模型决定调用函数时，它将使用输入参数调用该函数并将输出返回给模型。</li>
+<li>Spring AI为您处理此对话。它将函数调用分派到适当的函数并将结果返回给模型。</li>
+<li>该模型可以执行多个函数调用以检索所需的所有信息。</li>
+<li>一旦获取所有所需信息，模型将生成响应。</li>
+</ol>
+<p>请参阅<a href="https://docs.spring.io/spring-ai/reference/api/functions.html">函数调用</a>文档，以获取有关如何在不同 AI 模型中使用此功能的更多信息。</p><h2 id="evaluating-ai-responses-评估人工智能的响应">Evaluating AI responses 评估人工智能的响应</h2>
+<p>有效评估人工智能系统对用户请求的输出对于确保最终应用的准确性和实用性非常重要。一些新兴技术使得可以使用预训练模型本身来实现这一目的。</p><p>该评估过程涉及分析生成的响应是否与用户的意图和查询的上下文一致。使用相关性、一致性和事实正确性等指标来衡量人工智能生成响应的质量。</p><p>一种方法是将用户的请求和 AI 模型的响应同时呈现给模型，询问该响应是否与提供的数据一致。</p><p>此外，利用存储在向量数据库中的信息作为补充数据可以增强评估过程，有助于确定响应的相关性。</p><p>Spring AI项目提供了一个 <code>评估器</code> API，目前可以访问基本策略来评估模型响应。有关更多信息，请参阅 <a href="https://docs.spring.io/spring-ai/reference/api/testing.html">评估测试</a> 文档。</p><hr>
+<p>🔗原文链接：<a href="https://docs.spring.io/spring-ai/reference/concepts.html">https://docs.spring.io/spring-ai/reference/concepts.html</a></p>
+            ]]>
+        </content>
+    </entry>
     <entry>
         <title>PSQ队列简析</title>
         <author>
@@ -16,6 +75,9 @@
         </author>
         <link href="https://jobslee0.github.io/psqdui-lie-jian-xi.html"/>
         <id>https://jobslee0.github.io/psqdui-lie-jian-xi.html</id>
+            <category term="队列"/>
+            <category term="中间件"/>
+            <category term="PSQ"/>
 
         <updated>2023-01-18T16:25:00+08:00</updated>
             <summary>
@@ -77,6 +139,9 @@ public class DirectMemoryExample {
         </author>
         <link href="https://jobslee0.github.io/ji-yi-ci-jvmdui-wai-nei-cun-xie-lou-wen-ti.html"/>
         <id>https://jobslee0.github.io/ji-yi-ci-jvmdui-wai-nei-cun-xie-lou-wen-ti.html</id>
+            <category term="内存泄漏"/>
+            <category term="Java"/>
+            <category term="JVM"/>
 
         <updated>2023-01-10T16:22:00+08:00</updated>
             <summary>
@@ -148,6 +213,9 @@ public class DirectMemoryExample {
         </author>
         <link href="https://jobslee0.github.io/mongodbzhi-shi-zhan-wen-da.html"/>
         <id>https://jobslee0.github.io/mongodbzhi-shi-zhan-wen-da.html</id>
+            <category term="数据库"/>
+            <category term="NoSQL"/>
+            <category term="MongoDB"/>
 
         <updated>2023-01-10T14:58:00+08:00</updated>
             <summary>
@@ -196,6 +264,9 @@ public class DirectMemoryExample {
         </author>
         <link href="https://jobslee0.github.io/mongodbzhi-objectidxiang-jie.html"/>
         <id>https://jobslee0.github.io/mongodbzhi-objectidxiang-jie.html</id>
+            <category term="数据库"/>
+            <category term="NoSQL"/>
+            <category term="MongoDB"/>
 
         <updated>2023-01-10T11:15:00+08:00</updated>
             <summary>
@@ -248,6 +319,9 @@ public class DirectMemoryExample {
         </author>
         <link href="https://jobslee0.github.io/fan-yi-groovyying-yong-ji-cheng.html"/>
         <id>https://jobslee0.github.io/fan-yi-groovyying-yong-ji-cheng.html</id>
+            <category term="翻译"/>
+            <category term="Java"/>
+            <category term="Groovy"/>
 
         <updated>2023-01-09T15:45:00+08:00</updated>
             <summary>
@@ -676,6 +750,9 @@ def engine = new GroovyScriptEngine([tmpDir.toURI().toURL()] as URL[])          
         </author>
         <link href="https://jobslee0.github.io/fan-yi-groovybian-cheng-feng-ge-zhi-nan.html"/>
         <id>https://jobslee0.github.io/fan-yi-groovybian-cheng-feng-ge-zhi-nan.html</id>
+            <category term="翻译"/>
+            <category term="Java"/>
+            <category term="Groovy"/>
 
         <updated>2023-01-09T15:45:00+08:00</updated>
             <summary>
@@ -906,6 +983,9 @@ assert result == &quot;number&quot;
         </author>
         <link href="https://jobslee0.github.io/fan-yi-groovybi-bao.html"/>
         <id>https://jobslee0.github.io/fan-yi-groovybi-bao.html</id>
+            <category term="翻译"/>
+            <category term="Java"/>
+            <category term="Groovy"/>
 
         <updated>2023-01-09T15:45:00+08:00</updated>
             <summary>
@@ -1460,6 +1540,8 @@ assert gs == &#39;Name: Lucy&#39;               (10)
         </author>
         <link href="https://jobslee0.github.io/ji-yi-zhong-de-jing-dian-huai-jiu-you-xi-zheng-li.html"/>
         <id>https://jobslee0.github.io/ji-yi-zhong-de-jing-dian-huai-jiu-you-xi-zheng-li.html</id>
+            <category term="碎碎念"/>
+            <category term="怀旧"/>
 
         <updated>2022-01-23T21:34:00+08:00</updated>
             <summary>
